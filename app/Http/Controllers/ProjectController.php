@@ -2,63 +2,74 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
+use App\Models\Phase;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * 案件一覧を表示
      */
     public function index()
     {
-        //
+        $phases = Phase::orderBy('order')->get();
+        $projects = Project::all()->groupBy('phase_id');
+
+        return view('projects.index', compact('phases', 'projects'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * 案件作成ページ
      */
     public function create()
     {
-        //
+        $phases = Phase::orderBy('order')->get();
+        return view('projects.create', compact('phases'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * 案件保存処理
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'phase_id' => 'required|exists:phases,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'revenue' => 'nullable|numeric',
+            'profit' => 'nullable|numeric',
+        ]);
+
+        Project::create($request->all());
+
+        return redirect()->route('projects.create')->with('success', '案件が作成されました！');
     }
 
     /**
-     * Display the specified resource.
+     * 案件編集ページ
      */
-    public function show(string $id)
+    public function edit(Project $project)
     {
-        //
+        $phases = Phase::orderBy('order')->get();
+        return view('projects.edit', compact('project', 'phases'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * 案件更新処理
      */
-    public function edit(string $id)
+    public function update(Request $request, Project $project)
     {
-        //
-    }
+        $request->validate([
+            'phase_id' => 'required|exists:phases,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'revenue' => 'nullable|numeric',
+            'profit' => 'nullable|numeric',
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        $project->update($request->all());
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('projects.index')->with('success', '案件が更新されました！');
     }
 }

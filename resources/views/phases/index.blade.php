@@ -15,7 +15,6 @@
     <table class="w-full mt-4 border-collapse border border-gray-300">
         <thead>
             <tr class="bg-gray-200">
-                <th class="border px-4 py-2">ID</th>
                 <th class="border px-4 py-2">フェーズ名</th>
                 <th class="border px-4 py-2">アクション</th>
             </tr>
@@ -23,7 +22,6 @@
         <tbody>
             @foreach ($phases as $phase)
             <tr class="border">
-                <td class="border px-4 py-2">{{ $phase->id }}</td>
                 <td class="border px-4 py-2">{{ $phase->name }}</td>
                 <td class="border px-4 py-2 flex space-x-2">
                     <a href="{{ route('phases.edit', $phase->id) }}" class="text-blue-500">編集</a>
