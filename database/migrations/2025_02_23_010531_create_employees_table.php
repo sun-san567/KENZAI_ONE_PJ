@@ -9,10 +9,11 @@ return new class extends Migration {
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('department_id')->constrained()->onDelete('cascade')->comment('部門ID');
-            $table->string('name')->comment('担当者名');
-            $table->string('email')->nullable()->comment('メールアドレス');
-            $table->string('phone')->nullable()->comment('電話番号');
+            $table->foreignId('department_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('position')->nullable();
             $table->timestamps();
         });
     }

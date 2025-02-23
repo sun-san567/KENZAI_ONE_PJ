@@ -9,8 +9,8 @@ return new class extends Migration {
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->onDelete('cascade')->comment('会社ID');
-            $table->string('name')->comment('部門名');
+            $table->foreignId('company_id')->constrained()->onDelete('cascade'); // 会社ID（外部キー）
+            $table->string('name')->unique()->comment('部門名');
             $table->timestamps();
         });
     }
