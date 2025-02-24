@@ -17,7 +17,6 @@
     <table class="w-full bg-white shadow rounded-lg overflow-hidden">
         <thead>
             <tr class="bg-gray-200">
-                <th class="p-3">会社名</th>
                 <th class="p-3">部門名</th>
                 <th class="p-3">操作</th>
             </tr>
@@ -25,7 +24,6 @@
         <tbody>
             @foreach ($departments as $department)
             <tr class="border-b">
-                <td class="p-3">{{ $department->company->name }}</td>
                 <td class="p-3">{{ $department->name }}</td>
                 <td class="p-3">
                     <a href="{{ route('departments.edit', $department->id) }}" class="text-blue-500">編集</a>

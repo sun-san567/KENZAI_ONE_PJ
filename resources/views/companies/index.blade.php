@@ -16,26 +16,26 @@
     </div>
     @endif
 
-    <table class="min-w-full bg-white border border-gray-300">
+    <table class="w-full bg-white shadow rounded-lg overflow-hidden">
         <thead>
-            <tr>
-                <th class="py-2 px-4 border">会社名</th>
-                <th class="py-2 px-4 border">住所</th>
-                <th class="py-2 px-4 border">電話番号</th>
-                <th class="py-2 px-4 border">メール</th>
-                <th class="py-2 px-4 border">操作</th>
+            <tr class="bg-gray-200">
+                <th class="p-3">会社名</th>
+                <th class="p-3">住所</th>
+                <th class="p-3">電話番号</th>
+                <th class="p-3">メール</th>
+                <th class="p-3">操作</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($companies as $company)
-            <tr class="border">
-                <td class="py-2 px-4">{{ $company->name }}</td>
-                <td class="py-2 px-4">{{ $company->address }}</td>
-                <td class="py-2 px-4">{{ $company->phone }}</td>
-                <td class="py-2 px-4">{{ $company->email }}</td>
-                <td class="py-2 px-4">
+            <tr class="border-b">
+                <td class="p-3">{{ $company->name }}</td>
+                <td class="p-3">{{ $company->address }}</td>
+                <td class="p-3">{{ $company->phone }}</td>
+                <td class="p-3">{{ $company->email }}</td>
+                <td class="p-3">
                     <a href="{{ route('companies.edit', $company->id) }}" class="text-blue-500">編集</a>
-                    {{-- 削除ボタンは表示しない --}}
+                    {{-- 削除ボタンは不要なため非表示 --}}
                 </td>
             </tr>
             @endforeach

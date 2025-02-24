@@ -2,63 +2,112 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
+use App\Models\Department;
 use Illuminate\Http\Request;
+
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class EmployeeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        // 20件ずつ表示する
+        $employees = Employee::with('department')->paginate(20);
+
+        return view('employees.index', compact('employees'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $departments = Department::all();
+        return view('employees.create', compact('departments'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string|max:20',
+            'position' => 'nullable|string|max:255',
+        ]);
+
+        Employee::create($request->all());
+
+        return redirect()->route('employees.index')->with('success', '担当者を追加しました！');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Employee $employee)
     {
-        //
+        $departments = Department::all();
+        return view('employees.edit', compact('employee', 'departments'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Employee $employee)
     {
-        //
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string|max:20',
+            'position' => 'nullable|string|max:255',
+        ]);
+
+        $employee->update($request->all());
+
+        return redirect()->route('employees.index')->with('success', '担当者情報を更新しました！');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Employee $employee)
     {
-        //
+        $employee->delete();
+        return redirect()->route('employees.index')->with('success', '担当者を削除しました！');
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function import(Request $request)
     {
-        //
+        $request->validate([
+            'csv_file' => 'required|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file, "r");
+        $header = fgetcsv($handle); // ヘッダー行をスキップ
+
+        $errors = [];
+        $successCount = 0;
+
+        while ($row = fgetcsv($handle)) {
+            // 部門が見つからなければスキップ（エラーメッセージに追加）
+            $department = Department::where('name', $row[0])->first();
+            if (!$department) {
+                $errors[] = "部門 '{$row[0]}' が見つかりませんでした。";
+                continue;
+            }
+
+            // 担当者を作成
+            Employee::create([
+                'department_id' => $department->id,
+                'name' => $row[1],
+                'email' => $row[2],
+                'phone' => $row[3] ?? null,
+            ]);
+
+            $successCount++;
+        }
+
+        fclose($handle);
+
+        // インポート成功・エラーメッセージを表示
+        if (!empty($errors)) {
+            return redirect()->route('employees.index')->with([
+                'success' => "$successCount 件の担当者をインポートしました。",
+                'errors' => $errors
+            ]);
+        }
+
+        return redirect()->route('employees.index')->with('success', "$successCount 件の担当者をインポートしました！");
     }
 }

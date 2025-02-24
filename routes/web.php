@@ -22,4 +22,6 @@ Route::resource('phases', PhaseController::class);
 Route::resource('projects', ProjectController::class);
 Route::resource('companies', CompanyController::class);
 Route::resource('departments', DepartmentController::class);
+
 Route::resource('employees', EmployeeController::class);
+Route::post('/employees/import', [EmployeeController::class, 'import'])->name('employees.import');
