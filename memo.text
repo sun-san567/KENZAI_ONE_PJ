@@ -1,0 +1,55 @@
+KENZAI_ONE_PJ/
+│── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── PhaseController.php
+│   │   │   ├── ProjectController.php
+│   │   │   ├── Auth/  # 認証関連
+│   │   ├── Middleware/
+│   │   ├── Requests/  # バリデーションリクエスト
+│   │   │   ├── PhaseRequest.php
+│   │   │   ├── ProjectRequest.php
+│   ├── Models/
+│   │   ├── Phase.php
+│   │   ├── Project.php
+│   ├── Services/  # ビジネスロジック
+│   │   ├── PhaseService.php
+│   │   ├── ProjectService.php
+│   ├── Providers/
+│
+│── bootstrap/
+│── config/
+│── database/
+│   ├── migrations/
+│   │   ├── 2024_xx_xx_create_phases_table.php
+│   │   ├── 2024_xx_xx_create_projects_table.php
+│   ├── seeders/
+│   │   ├── PhaseSeeder.php
+│   │   ├── ProjectSeeder.php
+│
+│── resources/
+│   ├── views/
+│   │   ├── layouts/
+│   │   │   ├── app.blade.php
+│   │   ├── phases/
+│   │   │   ├── index.blade.php
+│   │   │   ├── create.blade.php
+│   │   │   ├── edit.blade.php
+│   │   ├── projects/
+│   │   │   ├── index.blade.php
+│   │   │   ├── create.blade.php
+│   │   │   ├── edit.blade.php
+│
+│── public/
+│── routes/
+│   ├── web.php
+│   ├── api.php
+│
+│── storage/
+│── tests/
+│── composer.json
+│── package.json
+│── tailwind.config.js
+│── vite.config.js
+│── .env
+│── artisan
