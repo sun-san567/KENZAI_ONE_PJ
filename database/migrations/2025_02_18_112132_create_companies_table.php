@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('companies', function (Blueprint $table) {
-            $table->id();
+            $table->id();  // ここで ID をプライマリキーとして作成
             $table->string('name')->unique()->comment('会社名');
             $table->string('address')->nullable()->comment('住所');
             $table->string('phone')->nullable()->comment('電話番号');

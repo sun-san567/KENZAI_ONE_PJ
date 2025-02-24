@@ -32,6 +32,8 @@
                     <li><a href="{{ route('dashboard') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">ダッシュボード</a></li>
                     <li><a href="{{ route('projects.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">PJ管理</a></li>
                     <li><a href="{{ route('phases.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">フェーズ管理</a></li>
+                    <!-- 追加部分: 顧客登録ページへのリンク -->
+                    <li><a href="{{ route('clients.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">顧客登録</a></li>
                 </ul>
             </div>
         </aside>

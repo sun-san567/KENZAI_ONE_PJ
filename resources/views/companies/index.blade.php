@@ -2,7 +2,16 @@
 
 @section('content')
 <div class="container mx-auto p-6">
-    <h1 class="text-xl font-bold mb-4 text-gray-800">会社情報</h1>
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold text-gray-800">会社情報</h1>
+        @if ($companies->isEmpty())
+        <a href="{{ route('companies.create') }}"
+            class="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition">
+            <span>➕</span>
+            <span>会社を登録</span>
+        </a>
+        @endif
+    </div>
 
     @if (session('success'))
     <div class="bg-green-200 text-green-700 p-3 rounded-lg mb-4 shadow">
@@ -43,17 +52,17 @@
                                 <span>編集</span>
                             </a>
 
-                            <!-- 削除ボタン -->
-                            <form action="{{ route('companies.destroy', $company->id) }}" method="POST"
-                                onsubmit="return confirm('本当に削除しますか？');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="inline-flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition">
-                                    <span>🗑️</span>
-                                    <span>削除</span>
-                                </button>
-                            </form>
+                            <!-- 削除ボタン（非表示） -->
+                            {{-- <form action="{{ route('companies.destroy', $company->id) }}" method="POST"
+                            onsubmit="return confirm('本当に削除しますか？');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="inline-flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition">
+                                <span>🗑️</span>
+                                <span>削除</span>
+                            </button>
+                            </form> --}}
                         </div>
                     </td>
                 </tr>
