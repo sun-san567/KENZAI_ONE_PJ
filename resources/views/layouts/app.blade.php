@@ -10,7 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
 
     <!-- ヘッダー -->
     <nav class="bg-blue-600 p-4 text-white">
@@ -20,7 +20,7 @@
     </nav>
 
     <!-- レイアウト全体のコンテナ -->
-    <div class="flex h-screen">
+    <div class="flex flex-1 min-h-screen">
         <!-- サイドバー -->
         <aside class="w-60 min-h-screen bg-gray-900 text-white">
             <div class="p-5">
@@ -37,7 +37,7 @@
         </aside>
 
         <!-- メインコンテンツ -->
-        <main class="flex-1 p-6 bg-white rounded-lg shadow-md">
+        <main class="flex-1 p-6 bg-white rounded-lg shadow-md overflow-auto">
             @yield('content')
         </main>
     </div>

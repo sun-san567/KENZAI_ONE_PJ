@@ -25,3 +25,6 @@ Route::resource('departments', DepartmentController::class);
 
 Route::resource('employees', EmployeeController::class);
 Route::post('/employees/import', [EmployeeController::class, 'import'])->name('employees.import');
+
+// CSVフォーマットダウンロード用のルート
+Route::get('/employees/download-format', [EmployeeController::class, 'downloadFormat'])->name('employees.download_format');

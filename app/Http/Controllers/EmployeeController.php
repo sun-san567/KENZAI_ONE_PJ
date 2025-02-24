@@ -7,17 +7,12 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 
 class EmployeeController extends Controller
 {
-    public function index()
-    {
-        // 20件ずつ表示する
-        $employees = Employee::with('department')->paginate(20);
 
-        return view('employees.index', compact('employees'));
-    }
 
     public function create()
     {
@@ -109,5 +104,56 @@ class EmployeeController extends Controller
         }
 
         return redirect()->route('employees.index')->with('success', "$successCount 件の担当者をインポートしました！");
+    }
+    // CSVフォーマットをダウンロード
+    public function downloadFormat()
+    {
+        $headers = [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=employee_format.csv"
+        ];
+
+        $columns = ["部門名", "担当者名", "メール", "電話番号"];
+
+        $callback = function () use ($columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function show($id)
+    {
+        $employee = Employee::with('department')->find($id);
+
+        if (!$employee) {
+            return redirect()->route('employees.index')->with('error', '担当者が見つかりませんでした。');
+        }
+
+        return view('employees.show', compact('employee'));
+    }
+
+    public function index(Request $request)
+    {
+        // 部門一覧取得（検索用）
+        $departments = Department::all();
+
+        // 検索条件を適用
+        $query = Employee::with('department');
+
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        // 担当者データ取得（20件ごとにページネーション）
+        $employees = $query->paginate(20);
+
+        return view('employees.index', compact('employees', 'departments'));
     }
 }
