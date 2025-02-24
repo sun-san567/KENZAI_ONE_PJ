@@ -1,47 +1,46 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'KENZAI-ONE')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+<body class="font-sans antialiased flex">
 
-    <!-- ヘッダー -->
-    <nav class="bg-blue-600 p-4 text-white">
-        <div class="container mx-auto">
-            <a href="{{ url('/') }}" class="text-lg font-bold">KENZAI-ONE</a>
-        </div>
-    </nav>
+    <!-- サイドバー -->
+    @include('layouts.sidebar')
 
-    <!-- レイアウト全体のコンテナ -->
-    <div class="flex flex-1 min-h-screen">
-        <!-- サイドバー -->
-        <aside class="w-60 min-h-screen bg-gray-900 text-white">
-            <div class="p-5">
-                <h2 class="text-lg font-bold">メニュー</h2>
-                <ul class="mt-4 space-y-2">
-                    <li><a href="{{ route('companies.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">自社情報管理</a></li>
-                    <li><a href="{{ route('departments.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">部門管理</a></li>
-                    <li><a href="{{ route('employees.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">担当者管理</a></li>
-                    <li><a href="{{ route('dashboard') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">ダッシュボード</a></li>
-                    <li><a href="{{ route('projects.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">PJ管理</a></li>
-                    <li><a href="{{ route('phases.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">フェーズ管理</a></li>
-                    <!-- 追加部分: 顧客登録ページへのリンク -->
-                    <li><a href="{{ route('clients.index') }}" class="block text-white hover:bg-gray-700 px-3 py-2 rounded">顧客登録</a></li>
-                </ul>
+    <!-- メインコンテンツ -->
+    <div class="flex-1 ml-64 min-h-screen bg-gray-100">
+
+        <!-- ヘッダー -->
+        @include('layouts.navigation')
+
+        <!-- ページヘッダー -->
+        @isset($header)
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {{ $header }}
             </div>
-        </aside>
+        </header>
+        @endisset
 
-        <!-- メインコンテンツ -->
-        <main class="flex-1 p-6 bg-white rounded-lg shadow-md overflow-auto">
+        <!-- ページコンテンツ -->
+        <main class="p-6">
             @yield('content')
         </main>
+
     </div>
 
 </body>
