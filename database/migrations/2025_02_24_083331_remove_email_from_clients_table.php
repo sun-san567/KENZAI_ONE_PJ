@@ -4,25 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up()
+return new class extends Migration {
+    public function up(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
-            $table->dropColumn('email'); // email カラムを削除
-        });
+        if (Schema::hasColumn('clients', 'email')) {
+            Schema::table('clients', function (Blueprint $table) {
+                $table->dropColumn('email');
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down()
+    public function down(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
-            $table->string('email')->nullable()->unique(); // もしロールバックする場合、email カラムを復元
-        });
+        if (!Schema::hasColumn('clients', 'email')) {
+            Schema::table('clients', function (Blueprint $table) {
+                $table->string('email')->nullable(); // もともと `nullable()` なら追加時も合わせる
+            });
+        }
     }
 };
