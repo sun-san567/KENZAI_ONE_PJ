@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->string('role')->default('user'); // 'admin', 'manager', 'user'
         });
 
         // パスワードリセット用のテーブル作成

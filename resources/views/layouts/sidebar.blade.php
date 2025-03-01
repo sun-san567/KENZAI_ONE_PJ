@@ -60,6 +60,13 @@
                     👨‍💼 <span>担当者管理</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('categories.index') }}"
+                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    {{ request()->routeIs('categories.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+                    🔖 <span>カテゴリ管理</span>
+                </a>
+            </li>
         </ul>
     </nav>
 </aside>

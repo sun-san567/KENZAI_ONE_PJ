@@ -4,12 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Company;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
     public function index()
     {
-        $companies = Company::all();
+        // ログインユーザーの所属会社のみ取得
+        $user = Auth::user();
+        $companies = Company::where('id', $user->company_id)->get();
+
+        // 会社が存在しない場合の処理
+        if ($companies->isEmpty()) {
+            return redirect()->route('companies.create')->with('error', '会社情報が登録されていません。');
+        }
+
         return view('companies.index', compact('companies'));
     }
 
@@ -41,7 +50,7 @@ class CompanyController extends Controller
     {
         return view('companies.edit', compact('company'));
     }
-    
+
     public function update(Request $request, Company $company)
     {
         $request->validate([
@@ -50,12 +59,12 @@ class CompanyController extends Controller
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
         ]);
-    
+
         $company->update($request->all());
-    
+
         return redirect()->route('companies.index')->with('success', '会社情報が更新されました。');
     }
-    
+
 
     public function destroy(Company $company)
     {
