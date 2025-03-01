@@ -3,7 +3,7 @@
 @section('content')
 <div class="flex flex-col min-h-screen">
     <div class="container mx-auto p-6 flex-grow">
-        <h1 class="text-xl font-bold mb-4">担当者管理</h1>
+        <h1 class="text-xl font-bold mb-4">ユーザー管理</h1>
 
         <!-- 成功メッセージ -->
         @if (session('success'))
@@ -21,15 +21,16 @@
         <div id="import-complete-message" class="hidden bg-green-200 text-green-800 p-3 rounded-lg mb-4 border border-green-400 shadow-md">
             ✅ CSVのインポートが完了しました！
         </div>
+
         <!-- ボタンエリア -->
         <div class="flex flex-col md:flex-row justify-end items-center space-y-2 md:space-y-0 md:space-x-4 mb-4">
-            <!-- 担当者追加ボタン -->
-            <a href="{{ route('employees.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow h-10 flex items-center">
-                担当者追加
+            <!-- ユーザー追加ボタン -->
+            <a href="{{ route('users.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow h-10 flex items-center">
+                ユーザー追加
             </a>
 
             <!-- CSVインポートフォーム -->
-            <form id="csv-upload-form" action="{{ route('employees.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+            <form id="csv-upload-form" action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
                 @csrf
                 <label class="relative cursor-pointer bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-2 text-gray-700 hover:bg-gray-100 h-10 flex items-center">
                     📂 ファイルを選択
@@ -41,12 +42,13 @@
             </form>
 
             <!-- CSVフォーマットダウンロード -->
-            <a href="{{ route('employees.download_format') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow h-10 flex items-center">
+            <a href="{{ route('users.download_format') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow h-10 flex items-center">
                 📥 インポートフォーマットDL
             </a>
         </div>
+
         <!-- 検索フォーム -->
-        <form method="GET" action="{{ route('employees.index') }}" class="mb-4 bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row md:items-center md:justify-between">
+        <form method="GET" action="{{ route('users.index') }}" class="mb-4 bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row md:items-center md:justify-between">
             <div class="flex items-center space-x-4">
                 <!-- 部門検索 -->
                 <div>
@@ -61,10 +63,10 @@
                     </select>
                 </div>
 
-                <!-- 担当者名検索 -->
+                <!-- ユーザー名検索 -->
                 <div>
-                    <label class="text-gray-700">担当者名:</label>
-                    <input type="text" name="name" class="border rounded px-3 py-1" value="{{ request('name') }}" placeholder="担当者名を入力">
+                    <label class="text-gray-700">ユーザー名:</label>
+                    <input type="text" name="name" class="border rounded px-3 py-1" value="{{ request('name') }}" placeholder="ユーザー名を入力">
                 </div>
             </div>
 
@@ -74,12 +76,12 @@
             </button>
         </form>
 
-        <!-- 担当者一覧テーブル -->
+        <!-- ユーザー一覧テーブル -->
         <div class="overflow-auto bg-white rounded-lg shadow p-4">
             <table class="w-full">
                 <thead>
                     <tr class="bg-gray-300 text-gray-700">
-                        <th class="p-3 text-left">担当者名</th>
+                        <th class="p-3 text-left">ユーザー名</th>
                         <th class="p-3 text-left">部門</th>
                         <th class="p-3 text-left">メール</th>
                         <th class="p-3 text-left">電話番号</th>
@@ -87,20 +89,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($employees as $employee)
+                    @foreach ($users as $user)
                     <tr class="border-b hover:bg-gray-50 transition">
-                        <td class="p-3">{{ $employee->name }}</td>
-                        <td class="p-3">{{ $employee->department->name }}</td>
-                        <td class="p-3">{{ $employee->email }}</td>
-                        <td class="p-3">{{ $employee->phone }}</td>
+                        <td class="p-3">{{ $user->name }}</td>
+                        <td class="p-3">{{ $user->department?->name }}</td>
+                        <td class="p-3">{{ $user->email }}</td>
+                        <td class="p-3">{{ $user->phone }}</td>
                         <td class="p-3 flex justify-center space-x-2">
                             <!-- 編集ボタン -->
-                            <a href="{{ route('employees.edit', $employee->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow-md text-sm">
+                            <a href="{{ route('users.edit', $user->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md shadow-md text-sm">
                                 編集
                             </a>
 
                             <!-- 削除ボタン（確認ダイアログ付き） -->
-                            <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" onsubmit="return confirmDelete(event)">
+                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" onsubmit="return confirmDelete(event)">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow-md text-sm">
@@ -114,9 +116,9 @@
             </table>
         </div>
 
-        <!-- ページネーションを右端に配置 -->
+        <!-- ページネーション -->
         <div class="mt-6 py-4 flex justify-end">
-            {{ $employees->links() }}
+            {{ $users->links() }}
         </div>
     </div>
 </div>

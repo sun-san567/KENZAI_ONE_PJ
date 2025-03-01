@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\UserController; // ← EmployeeController の代わりに UserController を使用
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PhaseController;
 use App\Http\Controllers\ProjectController;
@@ -35,10 +35,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('clients/import', [ClientController::class, 'import'])->name('clients.import');
     Route::get('clients/download-format', [ClientController::class, 'downloadFormat'])->name('clients.downloadFormat');
 
-    // 📌 担当者管理
-    Route::resource('employees', EmployeeController::class);
-    Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
-    Route::get('employees/download-format', [EmployeeController::class, 'downloadFormat'])->name('employees.download_format');
+    // 📌 担当者管理（users に統合）
+    Route::resource('users', UserController::class);
+    Route::post('users/import', [UserController::class, 'import'])->name('users.import');
+    Route::get('users/download-format', [UserController::class, 'downloadFormat'])->name('users.download_format');
 
     // 📌 会社・部門管理
     Route::resource('companies', CompanyController::class);

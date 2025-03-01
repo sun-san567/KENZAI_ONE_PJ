@@ -54,9 +54,9 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('employees.index') }}"
+                <a href="{{ route('users.index') }}"
                     class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
-                    {{ request()->routeIs('employees.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+        {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     👨‍💼 <span>担当者管理</span>
                 </a>
             </li>
