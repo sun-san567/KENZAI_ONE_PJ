@@ -8,7 +8,9 @@ use App\Http\Controllers\PhaseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProjectFileController;
 use Illuminate\Support\Facades\Route;
+
 
 // 🏠 トップページ
 Route::get('/', function () {
@@ -57,4 +59,7 @@ Route::middleware(['auth'])->group(function () {
 
     // 📌 カテゴリ管理
     Route::resource('categories', CategoryController::class);
+
+    // 📌 ファイル管理
+    Route::post('projects/{project}/files', [ProjectFileController::class, 'upload'])->name('projects.files.upload');
 });

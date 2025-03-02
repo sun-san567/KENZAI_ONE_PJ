@@ -8,7 +8,6 @@ use App\Models\Category;
 use App\Models\Project;
 use Illuminate\Http\Request;
 
-
 class ProjectController extends Controller
 {
     /**
@@ -16,11 +15,10 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        // フェーズ、顧客、カテゴリ、プロジェクト情報を取得
         $phases = Phase::all();
         $clients = Client::all();
         $categories = Category::all();
-        $projects = Project::with(['phase', 'categories'])->get()->groupBy('phase_id');
+        $projects = Project::with(['phase', 'categories', 'client'])->get()->groupBy('phase_id');
 
         return view('projects.index', compact('phases', 'clients', 'categories', 'projects'));
     }
@@ -31,8 +29,14 @@ class ProjectController extends Controller
     public function create()
     {
         $phases = Phase::orderBy('order')->get();
-        return view('projects.create', compact('phases'));
+        $clients = Client::all();
+        $categories = Category::all();
+
+        dd($categories); // ここで確認
+
+        return view('projects.create', compact('phases', 'clients', 'categories'));
     }
+
 
     /**
      * 案件保存処理
@@ -43,13 +47,12 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'phase_id' => 'required|exists:phases,id',
             'client_id' => 'required|exists:clients,id',
-            'category_id' => 'array', // 複数カテゴリ選択可能
-            'category_id.*' => 'exists:categories,id', // 各カテゴリが存在することをチェック
+            'category_id' => 'array',
+            'category_id.*' => 'exists:categories,id',
             'revenue' => 'nullable|numeric|min:0',
             'profit' => 'nullable|numeric|min:0',
         ]);
 
-        // プロジェクト作成
         $project = Project::create([
             'name' => $validated['name'],
             'phase_id' => $validated['phase_id'],
@@ -58,7 +61,6 @@ class ProjectController extends Controller
             'profit' => $validated['profit'] ?? 0,
         ]);
 
-        // ✅ カテゴリを紐付け
         if (!empty($validated['category_id'])) {
             $project->categories()->sync($validated['category_id']);
         }
@@ -72,8 +74,14 @@ class ProjectController extends Controller
     public function edit(Project $project)
     {
         $phases = Phase::orderBy('order')->get();
-        return view('projects.edit', compact('project', 'phases'));
+        $clients = Client::all();
+        $categories = Category::all();
+
+        dd($categories); // ここで確認
+
+        return view('projects.edit', compact('project', 'phases', 'clients', 'categories'));
     }
+
 
     /**
      * 案件更新処理
@@ -82,19 +90,28 @@ class ProjectController extends Controller
     {
         $validated = $request->validate([
             'phase_id' => 'required|exists:phases,id',
+            'client_id' => 'required|exists:clients,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'revenue' => 'nullable|numeric',
-            'profit' => 'nullable|numeric',
+            'revenue' => 'nullable|numeric|min:0',
+            'profit' => 'nullable|numeric|min:0',
             'category_id' => 'array',
             'category_id.*' => 'exists:categories,id',
         ]);
 
-        $project->update($validated);
+        $project->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'phase_id' => $validated['phase_id'],
+            'client_id' => $validated['client_id'],
+            'revenue' => $validated['revenue'] ?? 0,
+            'profit' => $validated['profit'] ?? 0,
+        ]);
 
-        // ✅ カテゴリを更新
         if (!empty($validated['category_id'])) {
             $project->categories()->sync($validated['category_id']);
+        } else {
+            $project->categories()->detach();
         }
 
         return redirect()->route('projects.index')->with('success', '案件が更新されました！');
