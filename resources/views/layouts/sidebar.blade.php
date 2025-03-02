@@ -62,7 +62,7 @@
                 <a href="{{ route('users.index') }}"
                     class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    👨‍💼 <span>メンバー管理</span>
+                    👨‍💼 <span>管理</span>
                 </a>
             </li>
             <li>
