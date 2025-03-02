@@ -1,3 +1,8 @@
+<!-- ハンバーガーメニュー（スマホ用） -->
+<button @click="open = !open" class="fixed top-4 left-4 sm:hidden text-white bg-gray-800 px-3 py-2 rounded-md">
+    ☰
+</button>
+
 <aside x-data="{ open: true }"
     class="bg-gray-900 text-white fixed top-0 left-0 h-full w-64 transition-transform duration-300 transform"
     :class="open ? 'translate-x-0' : '-translate-x-64'">
@@ -5,7 +10,7 @@
     <!-- サイドバートップ -->
     <div class="p-5 border-b border-gray-700 flex justify-between items-center">
         <h1 class="text-lg font-bold">KENZAI-ONE</h1>
-        <button @click="open = !open" class="sm:hidden text-white">✖️</button>
+        <button @click="open = !open" class="sm:hidden text-white" aria-label="サイドバー閉じる">✖️</button>
     </div>
 
     <!-- メニューリスト -->
@@ -26,9 +31,9 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('companies.index') }}"
+                <a href="{{ route('company.index') }}"
                     class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
-                    {{ request()->routeIs('companies.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+                    {{ request()->routeIs('company.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     🏢 <span>会社情報管理</span>
                 </a>
             </li>
@@ -56,8 +61,8 @@
             <li>
                 <a href="{{ route('users.index') }}"
                     class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
-        {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    👨‍💼 <span>担当者管理</span>
+                    {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+                    👨‍💼 <span>メンバー管理</span>
                 </a>
             </li>
             <li>

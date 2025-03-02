@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mx-auto p-6">
-    <h1 class="text-xl font-bold mb-4">会社情報の編集</h1>
+    <h1 class="text-xl font-bold mb-4">会社情報編集</h1>
 
     @if (session('success'))
     <div class="bg-green-200 p-2 text-green-700 mb-4 rounded">
@@ -10,7 +10,7 @@
     </div>
     @endif
 
-    <form action="{{ route('companies.update', $company->id) }}" method="POST" class="bg-white p-6 rounded shadow">
+    <form action="{{ route('company.update', $company->id) }}" method="POST" class="bg-white p-6 rounded shadow">
         @csrf
         @method('PUT')
 
@@ -33,17 +33,17 @@
         </div>
 
         <div class="mb-4">
-            <label for="email" class="block font-bold mb-1">メールアドレス</label>
+            <label for="email" class="block font-bold mb-1">メール</label>
             <input type="email" id="email" name="email" value="{{ old('email', $company->email) }}"
                 class="w-full border-gray-300 rounded p-2">
         </div>
 
-        <div class="flex justify-end">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+        <div class="flex justify-end space-x-4">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
                 更新
             </button>
-            <a href="{{ route('companies.index') }}" class="ml-4 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
-                キャンセル
+            <a href="{{ route('company.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow">
+                戻る
             </a>
         </div>
     </form>

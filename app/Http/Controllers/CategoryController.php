@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -22,10 +23,18 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
+        // ✅ 会社ごとにカテゴリ名がユニークであることを確認
         $request->validate([
-            'name' => 'required|unique:categories,name|max:255',
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('categories')->where(function ($query) {
+                    return $query->where('company_id', Auth::user()->company_id);
+                }),
+            ],
         ]);
 
+        // ✅ カテゴリを作成
         Category::create([
             'name' => $request->name,
             'company_id' => Auth::user()->company_id,
@@ -36,7 +45,7 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
-        // 他社のカテゴリは編集できないように制限
+        // ✅ 他社のカテゴリは編集不可
         if ($category->company_id !== Auth::user()->company_id) {
             return redirect()->route('categories.index')->with('error', '他社のカテゴリは編集できません');
         }
@@ -51,7 +60,13 @@ class CategoryController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|max:255|unique:categories,name,' . $category->id,
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('categories')->where(function ($query) use ($category) {
+                    return $query->where('company_id', Auth::user()->company_id)->where('id', '!=', $category->id);
+                }),
+            ],
         ]);
 
         $category->update(['name' => $request->name]);
@@ -63,6 +78,11 @@ class CategoryController extends Controller
     {
         if ($category->company_id !== Auth::user()->company_id) {
             return redirect()->route('categories.index')->with('error', '他社のカテゴリは削除できません');
+        }
+
+        // ✅ プロジェクトと関連しているカテゴリは削除不可
+        if ($category->projects()->exists()) {
+            return redirect()->route('categories.index')->with('error', 'このカテゴリはプロジェクトと関連しているため削除できません');
         }
 
         $category->delete();

@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\UserController; // ← EmployeeController の代わりに UserController を使用
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PhaseController;
 use App\Http\Controllers\ProjectController;
@@ -40,9 +40,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('users/download-format', [UserController::class, 'downloadFormat'])->name('users.download_format');
 
-    // 📌 会社・部門管理
-    Route::resource('companies', CompanyController::class);
-    Route::resource('departments', DepartmentController::class);
+    // 📌 会社・部門管理（統合）
+    Route::get('/company', [CompanyController::class, 'index'])->name('company.index'); // 会社情報＋部門情報
+    Route::get('/company/create', [CompanyController::class, 'create'])->name('company.create'); // 会社作成
+    Route::get('/company/{company}/edit', [CompanyController::class, 'edit'])->name('company.edit'); // 会社編集
+    Route::put('/company/{company}', [CompanyController::class, 'update'])->name('company.update'); // 会社情報更新
+
+
+    // 部門管理
+    Route::resource('departments', DepartmentController::class); // 部門の一覧・作成・編集・削除
+    // 部門追加・削除は `resource` で管理できるため不要
 
     // 📌 プロジェクト・フェーズ管理
     Route::resource('projects', ProjectController::class);
