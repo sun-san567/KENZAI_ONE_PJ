@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  ### MySQLコンテナ ###
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Suguru_0717
+      MYSQL_DATABASE: kenzaione_local
+      MYSQL_PASSWORD: Suguru_0717
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:  # ✅ ここを追加
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ### PHPコンテナ（Laravel実行用） ###
+  app:
+    build: .
+    container_name: laravel_app
+    restart: always
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    depends_on:
+      mysql:
+        condition: service_healthy  # ✅ MySQL が完全に起動するのを待つ
+    ports:
+      - "8000:8000"
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  ### phpMyAdminコンテナ ###
+  phpmyadmin:
+    image: arm64v8/phpmyadmin
+    container_name: phpmyadmin_local
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: Suguru_0717
+
+volumes:
+  mysql_data:

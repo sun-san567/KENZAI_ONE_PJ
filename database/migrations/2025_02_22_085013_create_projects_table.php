@@ -7,21 +7,31 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up()
     {
+        // ✅ `projects` テーブル作成
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('phase_id')->constrained('phases')->onDelete('cascade');
-            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade'); // 取引先テーブルと紐付け
+            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // 商材カテゴリと紐付け
-            $table->decimal('revenue', 10, 2)->default(0); // 売上
-            $table->decimal('profit', 10, 2)->default(0); // 粗利
+            $table->decimal('revenue', 10, 2)->default(0);
+            $table->decimal('profit', 10, 2)->default(0);
+            $table->timestamps();
+        });
+
+        // ✅ 多対多の `project_categories` テーブル作成
+        Schema::create('project_categories', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
     public function down()
     {
+        // ✅ 削除順を修正（外部キー制約の関係で `project_categories` を先に削除）
+        Schema::dropIfExists('project_categories');
         Schema::dropIfExists('projects');
     }
 };

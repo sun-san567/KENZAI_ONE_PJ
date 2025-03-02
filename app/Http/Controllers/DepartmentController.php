@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Department;
 use App\Models\Company;
@@ -10,9 +11,20 @@ class DepartmentController extends Controller
 {
     public function index()
     {
-        $departments = Department::with('company')->get();
+        // ログインユーザー取得
+        $user = Auth::user();
+
+        // 所属している会社の部門のみ取得
+        $departments = Department::where('company_id', $user->company_id)->get();
+
+        // 部門が存在しない場合の処理
+        if ($departments->isEmpty()) {
+            return redirect()->route('departments.create')->with('error', '部門情報が登録されていません。');
+        }
+
         return view('departments.index', compact('departments'));
     }
+
 
     public function create()
     {
