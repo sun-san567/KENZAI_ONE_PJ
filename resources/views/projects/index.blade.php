@@ -21,7 +21,7 @@
                 @foreach ($projectsByPhase[$phase->id] ?? [] as $project)
                 <!-- 🖊 チケットクリックで編集モーダル表示 -->
                 <div class="bg-white p-3 rounded-lg shadow cursor-pointer hover:bg-gray-100 transition"
-                    @click="openModal = true; selectedProject = {{ $project->toJson() }}">
+                    @click="openModal = true; selectedProject = {{ $project->toJson() }}; activeTab = 'edit'">
                     <h3 class="font-semibold">{{ $project->name }}</h3>
                     <p class="text-sm text-gray-600">{{ $project->description }}</p>
                     <p class="text-sm font-bold text-blue-600">売上: ¥{{ number_format($project->revenue ?? 0) }}</p>
@@ -66,7 +66,8 @@
                 </button>
                 <button @click="activeTab = 'files'"
                     class="px-4 py-2 font-semibold transition"
-                    :class="activeTab === 'files' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'">
+                    :class="activeTab === 'files' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'"
+                    x-show="selectedProject">
                     ファイル管理
                 </button>
             </div>
@@ -158,7 +159,72 @@
                 </form>
             </div>
 
+            <!-- 📌 ファイル管理タブ -->
+            <div x-show="activeTab === 'files'" x-data="fileManager(selectedProject?.id ?? 0)">
+                <label class="block font-semibold mb-2">ファイルアップロード</label>
+                <input type="file" @change="uploadFile" class="block w-full text-sm text-gray-500">
+                <div class="space-y-4">
+                    <template x-for="file in projectFiles" :key="file.id">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                <div class="text-2xl">📄</div>
+                                <div>
+                                    <p class="font-medium" x-text="file.file_name"></p>
+                                    <p class="text-sm text-gray-500" x-text="formatFileSize(file.size)"></p>
+                                </div>
+                            </div>
+                            <button @click="deleteFile(file.id)" class="text-red-600">🗑️</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 @endsection
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('fileManager', (projectId) => ({
+            projectFiles: [],
+            fileCategory: 'その他',
+
+            fetchFiles() {
+                if (!projectId) return;
+                fetch(`/api/projects/${projectId}/files`)
+                    .then(res => res.json())
+                    .then(data => this.projectFiles = data);
+            },
+
+            uploadFile(event) {
+                let formData = new FormData();
+                formData.append('file', event.target.files[0]);
+
+                fetch(`/api/projects/${projectId}/files`, {
+                        method: 'POST',
+                        body: formData
+                    }).then(res => res.json())
+                    .then(data => this.projectFiles.push(data))
+                    .catch(error => alert('アップロード失敗'));
+            },
+
+            deleteFile(fileId) {
+                fetch(`/api/projects/${projectId}/files/${fileId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(() => this.projectFiles = this.projectFiles.filter(f => f.id !== fileId));
+            },
+
+            formatFileSize(size) {
+                const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                let unitIndex = 0;
+                while (size >= 1024 && unitIndex < units.length - 1) {
+                    size /= 1024;
+                    unitIndex++;
+                }
+                return `${size.toFixed(2)} ${units[unitIndex]}`;
+            }
+        }));
+    });
+</script>
