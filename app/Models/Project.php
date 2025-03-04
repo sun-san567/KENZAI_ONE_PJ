@@ -68,4 +68,9 @@ class Project extends Model
             ]);
         }
     }
+
+    public function files()
+    {
+        return $this->hasMany(ProjectFile::class);
+    }
 }

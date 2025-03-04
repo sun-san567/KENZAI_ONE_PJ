@@ -18,9 +18,15 @@ class ProjectController extends Controller
         $phases = Phase::all();
         $clients = Client::all();
         $categories = Category::all();
-        $projects = Project::with(['phase', 'categories', 'client'])->get()->groupBy('phase_id');
 
-        return view('projects.index', compact('phases', 'clients', 'categories', 'projects'));
+        // ✅ `$projects` を `phase_id` をキーにした配列に変換
+        $projects = Project::with(['phase', 'categories', 'client'])->get();
+        $projectsByPhase = [];
+        foreach ($projects as $project) {
+            $projectsByPhase[$project->phase_id][] = $project;
+        }
+
+        return view('projects.index', compact('phases', 'clients', 'categories', 'projectsByPhase'));
     }
 
     /**
@@ -32,11 +38,8 @@ class ProjectController extends Controller
         $clients = Client::all();
         $categories = Category::all();
 
-        dd($categories); // ここで確認
-
         return view('projects.create', compact('phases', 'clients', 'categories'));
     }
-
 
     /**
      * 案件保存処理
@@ -47,7 +50,7 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'phase_id' => 'required|exists:phases,id',
             'client_id' => 'required|exists:clients,id',
-            'category_id' => 'array',
+            'category_id' => 'nullable|array',
             'category_id.*' => 'exists:categories,id',
             'revenue' => 'nullable|numeric|min:0',
             'profit' => 'nullable|numeric|min:0',
@@ -63,6 +66,8 @@ class ProjectController extends Controller
 
         if (!empty($validated['category_id'])) {
             $project->categories()->sync($validated['category_id']);
+        } else {
+            $project->categories()->detach();
         }
 
         return redirect()->route('projects.index')->with('success', '案件が作成されました。');
@@ -77,11 +82,8 @@ class ProjectController extends Controller
         $clients = Client::all();
         $categories = Category::all();
 
-        dd($categories); // ここで確認
-
         return view('projects.edit', compact('project', 'phases', 'clients', 'categories'));
     }
-
 
     /**
      * 案件更新処理
@@ -95,7 +97,7 @@ class ProjectController extends Controller
             'description' => 'nullable|string',
             'revenue' => 'nullable|numeric|min:0',
             'profit' => 'nullable|numeric|min:0',
-            'category_id' => 'array',
+            'category_id' => 'nullable|array',
             'category_id.*' => 'exists:categories,id',
         ]);
 

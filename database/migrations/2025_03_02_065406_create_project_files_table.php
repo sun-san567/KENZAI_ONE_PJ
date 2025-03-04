@@ -11,10 +11,13 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('project_id')->constrained()->onDelete('cascade'); // 🔹 プロジェクトに紐付く
             $table->string('file_name'); // 🔹 元のファイル名
-            $table->string('file_path'); // 🔹 ストレージのパス
-            $table->string('file_type'); // 🔹 拡張子
-            $table->integer('size'); // 🔹 ファイルサイズ（バイト）
-            $table->foreignId('uploaded_by')->constrained('users')->onDelete('cascade'); // 🔹 アップロードユーザー
+            $table->string('file_path')->unique(); // 🔹 ストレージのパス（重複防止）
+            $table->string('mime_type')->nullable(); // 🔹 MIMEタイプ（NULL可）
+            $table->string('file_extension', 20); // 🔹 拡張子 (例: dwg, dxf, step, iges)
+            $table->bigInteger('size'); // 🔹 ファイルサイズ（バイト、大容量対応）
+            $table->string('category')->nullable(); // 🔹 ファイルの種類（例: CAD, 図面, 見積書, 契約書）
+            $table->string('preview_path')->nullable(); // 🔹 プレビュー用画像のパス
+            $table->foreignId('uploaded_by')->nullable()->constrained('users')->onDelete('cascade'); // 🔹 ユーザー情報（NULL許可）
             $table->timestamps();
         });
     }
