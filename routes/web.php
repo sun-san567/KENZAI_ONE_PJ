@@ -12,6 +12,7 @@ use App\Http\Controllers\ProjectFileController;
 use Illuminate\Support\Facades\Route;
 
 
+
 // 🏠 トップページ
 Route::get('/', function () {
     return view('welcome');
@@ -62,4 +63,9 @@ Route::middleware(['auth'])->group(function () {
 
     // 📌 ファイル管理
     Route::post('projects/{project}/files', [ProjectFileController::class, 'upload'])->name('projects.files.upload');
+
+
+    Route::get('/home', function () {
+        return view('home');
+    })->name('home');
 });

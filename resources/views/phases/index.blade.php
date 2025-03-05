@@ -7,26 +7,14 @@
     <div class="container mx-auto p-6 flex-grow">
         <h1 class="text-xl font-bold mb-4">フェーズ管理</h1>
 
-        <!-- 成功メッセージ -->
-        @if (session('success'))
-        <div class="bg-green-200 text-green-700 p-3 rounded-lg shadow mb-4">
-            {{ session('success') }}
+        <!-- メッセージ表示 -->
+        @foreach (['success' => 'green', 'error' => 'red', 'warning' => 'yellow'] as $msg => $color)
+        @if (session($msg))
+        <div class="bg-{{ $color }}-200 text-{{ $color }}-700 p-3 rounded-lg shadow mb-4">
+            {{ session($msg) }}
         </div>
         @endif
-
-        <!-- エラーメッセージ -->
-        @if (session('error'))
-        <div class="bg-red-200 text-red-700 p-3 rounded-lg shadow mb-4">
-            {{ session('error') }}
-        </div>
-        @endif
-
-        <!-- 警告メッセージ -->
-        @if (session('warning'))
-        <div class="bg-yellow-200 text-yellow-700 p-3 rounded-lg shadow mb-4">
-            {{ session('warning') }}
-        </div>
-        @endif
+        @endforeach
 
         <!-- ボタンエリア -->
         <div class="flex justify-end mb-4">
@@ -36,8 +24,8 @@
         </div>
 
         <!-- フェーズ一覧テーブル -->
-        <div class="overflow-auto bg-white rounded-lg shadow p-4">
-            <table class="w-full">
+        <div class="overflow-x-auto bg-white rounded-lg shadow p-4">
+            <table class="w-full table-auto">
                 <thead>
                     <tr class="bg-gray-300 text-gray-700">
                         <th class="p-3 text-left">フェーズ名</th>
