@@ -17,38 +17,38 @@
     <form action="{{ route('phases.store') }}" method="POST">
         @csrf
 
-        <!-- フェーズ名 -->
         <div class="mb-4">
             <label for="name" class="block text-sm font-medium text-gray-700">フェーズ名</label>
-            <input type="text" name="name" id="name"
-                class="mt-1 block w-full p-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                value="{{ old('name') }}" required>
+            <input type="text" name="name" id="name" class="mt-1 block w-full p-2 border rounded-lg" value="{{ old('name') }}" required>
         </div>
 
-        <!-- 説明 -->
         <div class="mb-4">
             <label for="description" class="block text-sm font-medium text-gray-700">説明</label>
-            <textarea name="description" id="description" rows="3"
-                class="mt-1 block w-full p-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">{{ old('description') }}</textarea>
+            <textarea name="description" id="description" rows="3" class="mt-1 block w-full p-2 border rounded-lg">{{ old('description') }}</textarea>
         </div>
 
-        <!-- 並び順 -->
         <div class="mb-4">
             <label for="order" class="block text-sm font-medium text-gray-700">順番</label>
-            <input type="number" name="order" id="order"
-                class="mt-1 block w-full p-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                value="{{ old('order', 0) }}">
+            <input type="number" name="order" id="order" class="mt-1 block w-full p-2 border rounded-lg" value="{{ old('order', 0) }}">
         </div>
 
-        <!-- ボタン (右寄せ) -->
+        <!-- 🔴 管理者のみ部門を選択可能 -->
+        @if(Auth::user()->role === 'admin' && isset($departments))
+        <div class="mb-4">
+            <label for="department_id" class="block text-sm font-medium text-gray-700">部門</label>
+            <select name="department_id" id="department_id" class="mt-1 block w-full p-2 border rounded-lg">
+                @foreach($departments as $department)
+                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        @endif
+
         <div class="flex justify-end space-x-2">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow">
-                作成
-            </button>
-            <a href="{{ route('phases.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow">
-                戻る
-            </a>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">作成</button>
+            <a href="{{ route('phases.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">戻る</a>
         </div>
     </form>
+
 </div>
 @endsection

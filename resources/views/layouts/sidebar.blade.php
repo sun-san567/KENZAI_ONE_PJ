@@ -18,56 +18,56 @@
         <ul class="space-y-2">
             <li>
                 <a href="{{ route('dashboard') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('dashboard') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     🏠 <span>ダッシュボード</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('clients.index') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('clients.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     📋 <span>顧客管理</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('company.index') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('company.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     🏢 <span>会社情報管理</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('departments.index') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('departments.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     👥 <span>部門管理</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('projects.index') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('projects.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     📂 <span>PJ管理</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('phases.index') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('phases.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     🔄 <span>フェーズ管理</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('users.index') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    👨‍💼 <span>メンバー管理</span>
+                    👨‍💼 <span>管理</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('categories.index') }}"
-                    class="block px-5 py-3 flex items-center space-x-2 text-white rounded-md 
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('categories.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     🔖 <span>カテゴリ管理</span>
                 </a>

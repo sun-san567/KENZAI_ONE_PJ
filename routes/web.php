@@ -8,7 +8,10 @@ use App\Http\Controllers\PhaseController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProjectFileController;
 use Illuminate\Support\Facades\Route;
+
+
 
 // 🏠 トップページ
 Route::get('/', function () {
@@ -57,4 +60,28 @@ Route::middleware(['auth'])->group(function () {
 
     // 📌 カテゴリ管理
     Route::resource('categories', CategoryController::class);
+
+    // プロジェクトファイル関連のルート
+    Route::prefix('projects/{project}/files')->group(function () {
+        Route::get('/', [ProjectFileController::class, 'index'])->name('projects.files.index');
+        Route::post('/upload', [ProjectFileController::class, 'upload'])->name('projects.files.upload');
+        Route::get('/{file}/download', [ProjectFileController::class, 'download'])->name('projects.files.download');
+    });
+
+    Route::delete('/projects/{project}/files/{file}', [ProjectFileController::class, 'destroy'])
+        ->name('projects.files.destroy');
+
+    Route::post('/projects/{project}/files/bulk-delete', [ProjectFileController::class, 'bulkDelete'])
+        ->name('projects.files.bulk-delete');
+
+    // ファイルのプレビュー関連ルート
+    Route::get('/projects/{project}/files/{file}/preview', [ProjectFileController::class, 'preview'])
+        ->name('projects.files.preview');
+
+    Route::get('/projects/{project}/files/{file}/content', [ProjectFileController::class, 'previewContent'])
+        ->name('projects.files.preview-content');
+
+    Route::get('/home', function () {
+        return view('home');
+    })->name('home');
 });
