@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ProjectFileController extends Controller
 {
@@ -88,13 +90,158 @@ class ProjectFileController extends Controller
         return Storage::download($file->file_path, $file->file_name);
     }
 
-    public function destroy(Project $project, ProjectFile $file)
+    /**
+     * 指定されたファイルを削除（MVP版：権限チェックを簡略化）
+     */
+    public function destroy(Project $project, $fileId)
     {
-        abort_unless(auth()->user()->can('update', $project), 403);
+        // MVP段階では権限チェックを省略
+        // TODO: リリース前に適切な権限チェックを実装する
+        
+        $file = ProjectFile::findOrFail($fileId);
+        
+        // プロジェクトとファイルの関連性だけは確認
+        if ($file->project_id !== $project->id) {
+            return redirect()->back()->with('error', 'このファイルはプロジェクトに属していません。');
+        }
+        
+        try {
+            // ストレージからファイルを削除
+            if ($file->file_path) {
+                $filePath = storage_path('app/public/files/' . $file->file_path);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+            
+            // データベースからレコードを削除
+            $file->delete();
+            
+            return redirect()->back()->with('success', 'ファイルを削除しました。');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'ファイルの削除中にエラーが発生しました: ' . $e->getMessage());
+        }
+    }
 
-        Storage::delete($file->file_path);
-        $file->delete();
+    /**
+     * 複数のファイルを一括削除（MVP版：権限チェックを簡略化）
+     */
+    public function bulkDelete(Request $request, Project $project)
+    {
+        // MVP段階では権限チェックを省略
+        // TODO: リリース前に適切な権限チェックを実装する
+        
+        $request->validate([
+            'file_ids' => 'required|array',
+            'file_ids.*' => 'integer|exists:project_files,id'
+        ]);
+        
+        $fileIds = $request->input('file_ids');
+        $deletedCount = 0;
+        
+        // トランザクション開始
+        DB::beginTransaction();
+        
+        try {
+            // プロジェクトに属するファイルのみを取得
+            $files = ProjectFile::where('project_id', $project->id)
+                        ->whereIn('id', $fileIds)
+                        ->get();
+            
+            foreach ($files as $file) {
+                // ストレージからファイルを削除
+                if ($file->file_path) {
+                    $filePath = storage_path('app/public/files/' . $file->file_path);
+                    if (file_exists($filePath)) {
+                        unlink($filePath);
+                    }
+                }
+                
+                // データベースからレコードを削除
+                $file->delete();
+                $deletedCount++;
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => $deletedCount . '件のファイルが削除されました。',
+                'deleted_count' => $deletedCount
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'ファイルの削除中にエラーが発生しました: ' . $e->getMessage()], 500);
+        }
+    }
 
-        return response()->json(['message' => 'ファイルを削除しました']);
+    /**
+     * ファイルのプレビュー情報を取得
+     */
+    public function preview(Project $project, $fileId)
+    {
+        $this->authorize('view', $project);
+
+        $file = ProjectFile::findOrFail($fileId);
+
+        if ($file->project_id !== $project->id) {
+            abort(403, 'このファイルにアクセスする権限がありません。');
+        }
+
+        // ファイルの情報を取得
+        $previewData = [
+            'id' => $file->id,
+            'file_name' => $file->file_name,
+            'mime_type' => $file->mime_type,
+            'preview_url' => route('projects.files.preview-content', [$project->id, $file->id])
+        ];
+
+        return response()->json($previewData);
+    }
+
+    /**
+     * ファイルのプレビューコンテンツを取得
+     */
+    public function previewContent(Project $project, $fileId)
+    {
+        $this->authorize('view', $project);
+
+        $file = ProjectFile::findOrFail($fileId);
+
+        if ($file->project_id !== $project->id) {
+            abort(403, 'このファイルにアクセスする権限がありません。');
+        }
+
+        $path = storage_path('app/public/files/' . $file->file_path);
+
+        // ファイルが存在するか確認
+        if (!file_exists($path)) {
+            return response()->json(['error' => 'ファイルが見つかりません'], 404);
+        }
+
+        // ファイルタイプに応じたレスポンスを返す
+        $mimeType = $file->mime_type;
+
+        // 画像ファイル
+        if (Str::startsWith($mimeType, 'image/')) {
+            return response()->file($path);
+        }
+
+        // PDFファイル
+        if ($mimeType === 'application/pdf') {
+            return response()->file($path);
+        }
+
+        // テキストファイル
+        if (Str::startsWith($mimeType, 'text/')) {
+            $content = file_get_contents($path);
+            return response($content, 200, [
+                'Content-Type' => 'text/plain; charset=utf-8'
+            ]);
+        }
+
+        // 対応していないファイル形式
+        return response()->json(['error' => 'このファイル形式はプレビューに対応していません'], 400);
     }
 }

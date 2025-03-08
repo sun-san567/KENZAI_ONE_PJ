@@ -76,14 +76,34 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex space-x-3">
+                                <!-- プレビューボタン（既存機能を保持） -->
+                                @if(isPreviewable($file->mime_type))
+                                <button onclick="openPreview({{ $project->id }}, {{ $file->id }}, '{{ $file->file_name }}')"
+                                    class="text-gray-600 hover:text-gray-900 flex items-center">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    <span>プレビュー</span>
+                                </button>
+                                @endif
+
                                 <!-- ダウンロードボタン -->
                                 <a href="{{ route('projects.files.download', [$project->id, $file->id]) }}"
-                                    class="text-blue-600 hover:text-blue-900 flex items-center"
-                                    data-file-id="{{ $file->id }}"
-                                    onclick="handleDownload(event, this)">
+                                    class="text-blue-600 hover:text-blue-900 flex items-center">
                                     <i class="fas fa-download mr-1"></i>
                                     <span>ダウンロード</span>
                                 </a>
+
+                                <!-- 削除ボタン -->
+                                <form action="{{ route('projects.files.destroy', [$project->id, $file->id]) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('{{ $file->file_name }} を削除してもよろしいですか？\nこの操作は取り消せません。');"
+                                    class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-900 flex items-center">
+                                        <i class="fas fa-trash-alt mr-1"></i>
+                                        <span>削除</span>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -167,6 +187,90 @@
         setTimeout(() => {
             toast.remove();
         }, 3000);
+    }
+
+    // プレビューモーダルを開く
+    async function openPreview(projectId, fileId, fileName) {
+        const modal = document.getElementById('previewModal');
+        const previewContent = document.getElementById('previewContent');
+        const previewFileName = document.getElementById('previewFileName');
+        const previewDownloadBtn = document.getElementById('previewDownloadBtn');
+
+        // モーダルを表示
+        modal.classList.remove('hidden');
+        previewFileName.textContent = fileName;
+        previewDownloadBtn.href = `/projects/${projectId}/files/${fileId}/download`;
+
+        // ローディング表示
+        previewContent.innerHTML = `
+            <div class="flex items-center justify-center h-full">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        `;
+
+        try {
+            // CSRFトークンの取得
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+            // ファイル情報を取得
+            const response = await fetch(`/projects/${projectId}/files/${fileId}/preview`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('プレビューの読み込みに失敗しました');
+            }
+
+            const data = await response.json();
+
+            // ファイルタイプに応じたプレビュー表示
+            if (data.mime_type.startsWith('image/')) {
+                // 画像プレビュー
+                previewContent.innerHTML = `
+                    <div class="flex items-center justify-center h-full">
+                        <img src="${data.preview_url}" class="max-h-[70vh] max-w-full object-contain" alt="${fileName}">
+                    </div>
+                `;
+            } else if (data.mime_type === 'application/pdf') {
+                // PDFプレビュー
+                previewContent.innerHTML = `
+                    <div class="h-[70vh]">
+                        <iframe src="${data.preview_url}" class="w-full h-full border-0" frameborder="0"></iframe>
+                    </div>
+                `;
+            } else if (data.mime_type.includes('text/')) {
+                // テキストプレビュー
+                const textResponse = await fetch(data.preview_url);
+                const text = await textResponse.text();
+                previewContent.innerHTML = `
+                    <div class="bg-white p-4 border rounded">
+                        <pre class="whitespace-pre-wrap break-words">${escapeHtml(text)}</pre>
+                    </div>
+                `;
+            } else {
+                // プレビュー非対応ファイル
+                previewContent.innerHTML = `
+                    <div class="text-center p-8">
+                        <i class="fas fa-file-alt text-gray-400 text-5xl mb-4"></i>
+                        <p class="text-gray-600">このファイル形式はプレビューに対応していません。</p>
+                        <p class="text-sm text-gray-500 mt-2">ダウンロードして内容をご確認ください。</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Preview error:', error);
+            previewContent.innerHTML = `
+                <div class="text-center p-8">
+                    <i class="fas fa-exclamation-circle text-red-500 text-5xl mb-4"></i>
+                    <p class="text-red-600">プレビューの読み込みに失敗しました</p>
+                    <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                </div>
+            `;
+        }
     }
 </script>
 @endpush
