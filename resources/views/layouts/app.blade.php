@@ -44,6 +44,9 @@
 
     </div>
 
+    <!-- ここが重要: scripts セクション -->
+    @yield('scripts')
+
 </body>
 
 </html>

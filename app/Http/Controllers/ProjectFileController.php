@@ -24,13 +24,113 @@ class ProjectFileController extends Controller
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     ];
 
-    public function index(Project $project)
+    /**
+     * ファイル一覧と検索機能
+     */
+    public function index(Request $request, Project $project)
     {
-        $files = ProjectFile::where('project_id', $project->id)->paginate(15);
-        return view('projects.files.index', [
-            'project' => $project,
-            'files' => $files
-        ]);
+        // 詳細なエラーログ出力を有効化
+        try {
+            // 検索パラメータの取得
+            $search = $request->input('search');
+            $fileType = $request->input('type');
+
+            // デバッグログ
+            \Log::info('プロジェクトファイル検索', [
+                'project_id' => $project->id,
+                'search' => $search,
+                'type' => $fileType,
+                'is_ajax' => $request->ajax() || $request->has('ajax')
+            ]);
+
+            // クエリビルダーの初期化
+            $query = ProjectFile::where('project_id', $project->id);
+
+            // 検索条件の適用
+            if ($search) {
+                $query->where('file_name', 'like', '%' . $search . '%');
+                // 必要に応じてdescriptionなど他のフィールドも検索
+            }
+
+            // ファイルタイプでフィルタリング（簡略化）
+            if ($fileType) {
+                $query->where('mime_type', 'like', $fileType . '%');
+            }
+
+            // ファイルを取得
+            $files = $query->orderBy('created_at', 'desc')->paginate(10);
+
+            // AJAXリクエストの場合
+            if ($request->ajax() || $request->has('ajax')) {
+                // HTMLを直接生成（パーシャルビューの問題を回避）
+                $html = '';
+
+                if ($files->count() > 0) {
+                    foreach ($files as $file) {
+                        // 簡易的なHTMLを生成
+                        $html .= '<tr class="hover:bg-gray-50">';
+                        $html .= '<td class="px-4 py-4"><input type="checkbox" class="file-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" data-file-id="' . $file->id . '"></td>';
+                        $html .= '<td class="px-6 py-4 whitespace-nowrap">';
+                        $html .= '<div class="flex items-center">';
+                        $html .= '<div class="flex-shrink-0 h-10 w-10 flex items-center justify-center">';
+                        $html .= '<i class="fas fa-file text-gray-500 text-xl"></i>';
+                        $html .= '</div>';
+                        $html .= '<div class="ml-4">';
+                        $html .= '<div class="text-sm font-medium text-gray-900">' . $file->file_name . '</div>';
+                        $html .= '<div class="text-sm text-gray-500">' . $file->mime_type . '</div>';
+                        $html .= '</div></div></td>';
+                        $html .= '<td class="px-6 py-4 whitespace-nowrap">';
+                        $html .= '<div class="text-sm text-gray-900">' . ($file->file_size ? round($file->file_size / 1024, 2) . ' KB' : 'N/A') . '</div>';
+                        $html .= '</td>';
+                        $html .= '<td class="px-6 py-4 whitespace-nowrap">';
+                        $html .= '<div class="text-sm text-gray-900">' . $file->created_at->format('Y/m/d H:i') . '</div>';
+                        $html .= '</td>';
+                        $html .= '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">';
+                        $html .= '<div class="flex space-x-4">';
+                        $html .= '<a href="' . route('projects.files.download', [$project->id, $file->id]) . '" class="text-blue-600 hover:text-blue-900 flex items-center">';
+                        $html .= '<i class="fas fa-download mr-1"></i><span>ダウンロード</span></a>';
+
+                        // 削除フォーム
+                        $html .= '<form method="POST" action="' . route('projects.files.destroy', [$project->id, $file->id]) . '" class="inline">';
+                        $html .= csrf_field();
+                        $html .= method_field('DELETE');
+                        $html .= '<button type="submit" class="text-red-600 hover:text-red-900 flex items-center">';
+                        $html .= '<i class="fas fa-trash-alt mr-1"></i><span>削除</span></button>';
+                        $html .= '</form>';
+
+                        $html .= '</div></td></tr>';
+                    }
+                } else {
+                    $html = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">検索条件に一致するファイルがありません</td></tr>';
+                }
+
+                return response()->json([
+                    'html' => $html,
+                    'hasResults' => $files->count() > 0
+                ]);
+            }
+
+            // 通常リクエストの場合
+            return view('projects.files.index', compact('project', 'files'));
+        } catch (\Exception $e) {
+            // 詳細なエラーログ
+            \Log::error('プロジェクトファイル検索エラー', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // AJAXリクエストの場合はJSONエラーを返す
+            if ($request->ajax() || $request->has('ajax')) {
+                return response()->json([
+                    'error' => '検索処理中にエラーが発生しました: ' . $e->getMessage()
+                ], 500);
+            }
+
+            // 通常リクエストの場合はエラー表示
+            return back()->with('error', '検索処理中にエラーが発生しました');
+        }
     }
 
     public function upload(Request $request, Project $project)
@@ -91,88 +191,82 @@ class ProjectFileController extends Controller
     }
 
     /**
-     * 指定されたファイルを削除（MVP版：権限チェックを簡略化）
+     * 削除機能の修正 - リダイレクト応答を返すように変更
      */
     public function destroy(Project $project, $fileId)
     {
-        // MVP段階では権限チェックを省略
-        // TODO: リリース前に適切な権限チェックを実装する
-        
+        // 権限チェックは一旦無視
+        // $this->authorize('update', $project);
+
         $file = ProjectFile::findOrFail($fileId);
-        
-        // プロジェクトとファイルの関連性だけは確認
+
+        // プロジェクトとファイルの関連性を確認
         if ($file->project_id !== $project->id) {
             return redirect()->back()->with('error', 'このファイルはプロジェクトに属していません。');
         }
-        
+
         try {
             // ストレージからファイルを削除
             if ($file->file_path) {
-                $filePath = storage_path('app/public/files/' . $file->file_path);
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
+                Storage::delete('public/files/' . $file->file_path);
             }
-            
+
             // データベースからレコードを削除
             $file->delete();
-            
-            return redirect()->back()->with('success', 'ファイルを削除しました。');
+
+            // JSON応答ではなくリダイレクトを返す
+            return redirect()->back()->with('success', 'ファイルが削除されました。');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'ファイルの削除中にエラーが発生しました: ' . $e->getMessage());
         }
     }
 
     /**
-     * 複数のファイルを一括削除（MVP版：権限チェックを簡略化）
+     * 複数のファイルを一括削除
      */
     public function bulkDelete(Request $request, Project $project)
     {
-        // MVP段階では権限チェックを省略
-        // TODO: リリース前に適切な権限チェックを実装する
-        
+        // $this->authorize('update', $project); // この行をコメントアウトまたは削除
+
         $request->validate([
             'file_ids' => 'required|array',
-            'file_ids.*' => 'integer|exists:project_files,id'
+            'file_ids.*' => 'integer|exists:files,id'
         ]);
-        
+
         $fileIds = $request->input('file_ids');
         $deletedCount = 0;
-        
+
         // トランザクション開始
         DB::beginTransaction();
-        
+
         try {
             // プロジェクトに属するファイルのみを取得
             $files = ProjectFile::where('project_id', $project->id)
-                        ->whereIn('id', $fileIds)
-                        ->get();
-            
+                ->whereIn('id', $fileIds)
+                ->get();
+
             foreach ($files as $file) {
                 // ストレージからファイルを削除
-                if ($file->file_path) {
-                    $filePath = storage_path('app/public/files/' . $file->file_path);
-                    if (file_exists($filePath)) {
-                        unlink($filePath);
-                    }
+                $filePath = storage_path('app/public/files/' . $file->file_path);
+                if (file_exists($filePath)) {
+                    unlink($filePath);
                 }
-                
+
                 // データベースからレコードを削除
                 $file->delete();
                 $deletedCount++;
             }
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => $deletedCount . '件のファイルが削除されました。',
                 'deleted_count' => $deletedCount
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'ファイルの削除中にエラーが発生しました: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'ファイルの削除中にエラーが発生しました。'], 500);
         }
     }
 

@@ -1,30 +1,63 @@
 <div class="col-span-8">
     <div class="bg-white rounded-lg shadow p-6">
-        <!-- 検索フォーム -->
-        <div class="mb-6">
-            <div class="flex gap-4">
-                <div class="flex-1">
-                    <input type="text"
-                        id="searchInput"
-                        placeholder="ファイル名で検索..."
-                        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <!-- 上部コントロール部分 - 検索とアップロード -->
+        <div class="mb-6 flex flex-col md:flex-row justify-between gap-4">
+            <!-- 検索エリア -->
+            <div class="flex flex-col sm:flex-row gap-4 w-full md:w-2/3">
+                <div class="w-full sm:w-2/3">
+                    <div class="flex">
+                        <div class="relative flex-1">
+                            <input type="text"
+                                id="searchInput"
+                                placeholder="ファイル名で検索..."
+                                class="w-full px-4 py-2 pr-10 border border-r-0 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="absolute right-3 top-2.5 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </span>
+                        </div>
+                        <button type="button" id="searchButton" onclick="window.fileSearchModule.performSearch()"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                            検索
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <select id="typeFilter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">すべての種類</option>
-                        <option value="pdf">PDF</option>
-                        <option value="image">画像</option>
+
+                <div class="w-full sm:w-1/3">
+                    <select id="typeFilter" onchange="window.fileSearchModule.performSearch()" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">すべてのタイプ</option>
                         <option value="document">文書</option>
+                        <option value="image">画像</option>
+                        <option value="video">動画</option>
+                        <option value="audio">音声</option>
+                        <option value="archive">圧縮ファイル</option>
                     </select>
                 </div>
             </div>
+
+            <!-- アップロードエリアを復元（既存のファイルを利用） -->
+            <div class="w-full md:w-1/3 lg:w-1/4 xl:w-1/5">
+                @include('projects.files.partials.upload-area')
+            </div>
         </div>
+
+        <!-- デバッグ情報表示エリア -->
+        <!-- <div id="debugArea" class="mb-4 p-3 bg-gray-100 rounded-lg border border-gray-300 overflow-auto max-h-48 text-xs font-mono">
+            <div class="flex justify-between mb-1">
+                <h3 class="font-bold">デバッグ情報</h3>
+                <button onclick="document.getElementById('debugContent').innerHTML = ''" class="text-xs text-red-500 hover:text-red-700">クリア</button>
+            </div>
+            <div id="debugContent"></div>
+        </div> -->
 
         <!-- ファイル一覧テーブル -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="w-8 px-4 py-3">
+                            <input type="checkbox" id="selectAll"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             ファイル名
                         </th>
@@ -39,7 +72,7 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody id="fileListBody" class="bg-white divide-y divide-gray-200">
                     @foreach($files as $file)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -112,165 +145,15 @@
             </table>
         </div>
 
+        <!-- 検索結果がない場合のメッセージ -->
+        <div id="noResultsMessage" class="hidden py-8 text-center text-gray-500">
+            <i class="fas fa-search text-3xl mb-2"></i>
+            <p>検索条件に一致するファイルが見つかりませんでした。</p>
+        </div>
+
         <!-- ページネーション -->
-        <div class="mt-4">
+        <div class="mt-4" id="pagination">
             {{ $files->links() }}
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    async function handleDownload(event, element) {
-        event.preventDefault();
-        const fileId = element.dataset.fileId;
-
-        try {
-            // ダウンロード開始時のUI更新
-            element.classList.add('opacity-50', 'cursor-wait');
-            element.querySelector('i').classList.add('fa-spinner', 'fa-spin');
-
-            const response = await fetch(`/api/files/${fileId}/download`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('ダウンロードに失敗しました');
-            }
-
-            // Content-Dispositionヘッダーからファイル名を取得
-            const contentDisposition = response.headers.get('Content-Disposition');
-            const fileName = contentDisposition ?
-                decodeURIComponent(contentDisposition.split('filename=')[1].replace(/['"]/g, '')) :
-                'download';
-
-            // ファイルのダウンロード
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-            // 成功通知
-            showToast('ダウンロードが完了しました', 'success');
-
-        } catch (error) {
-            console.error('Download error:', error);
-            showToast(error.message, 'error');
-        } finally {
-            // UI を元に戻す
-            element.classList.remove('opacity-50', 'cursor-wait');
-            element.querySelector('i').classList.remove('fa-spinner', 'fa-spin');
-        }
-    }
-
-    // トースト通知の表示
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `fixed bottom-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white`;
-
-        toast.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-        <span>${message}</span>
-    `;
-
-        document.body.appendChild(toast);
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
-
-    // プレビューモーダルを開く
-    async function openPreview(projectId, fileId, fileName) {
-        const modal = document.getElementById('previewModal');
-        const previewContent = document.getElementById('previewContent');
-        const previewFileName = document.getElementById('previewFileName');
-        const previewDownloadBtn = document.getElementById('previewDownloadBtn');
-
-        // モーダルを表示
-        modal.classList.remove('hidden');
-        previewFileName.textContent = fileName;
-        previewDownloadBtn.href = `/projects/${projectId}/files/${fileId}/download`;
-
-        // ローディング表示
-        previewContent.innerHTML = `
-            <div class="flex items-center justify-center h-full">
-                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        `;
-
-        try {
-            // CSRFトークンの取得
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-            // ファイル情報を取得
-            const response = await fetch(`/projects/${projectId}/files/${fileId}/preview`, {
-                method: 'GET',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('プレビューの読み込みに失敗しました');
-            }
-
-            const data = await response.json();
-
-            // ファイルタイプに応じたプレビュー表示
-            if (data.mime_type.startsWith('image/')) {
-                // 画像プレビュー
-                previewContent.innerHTML = `
-                    <div class="flex items-center justify-center h-full">
-                        <img src="${data.preview_url}" class="max-h-[70vh] max-w-full object-contain" alt="${fileName}">
-                    </div>
-                `;
-            } else if (data.mime_type === 'application/pdf') {
-                // PDFプレビュー
-                previewContent.innerHTML = `
-                    <div class="h-[70vh]">
-                        <iframe src="${data.preview_url}" class="w-full h-full border-0" frameborder="0"></iframe>
-                    </div>
-                `;
-            } else if (data.mime_type.includes('text/')) {
-                // テキストプレビュー
-                const textResponse = await fetch(data.preview_url);
-                const text = await textResponse.text();
-                previewContent.innerHTML = `
-                    <div class="bg-white p-4 border rounded">
-                        <pre class="whitespace-pre-wrap break-words">${escapeHtml(text)}</pre>
-                    </div>
-                `;
-            } else {
-                // プレビュー非対応ファイル
-                previewContent.innerHTML = `
-                    <div class="text-center p-8">
-                        <i class="fas fa-file-alt text-gray-400 text-5xl mb-4"></i>
-                        <p class="text-gray-600">このファイル形式はプレビューに対応していません。</p>
-                        <p class="text-sm text-gray-500 mt-2">ダウンロードして内容をご確認ください。</p>
-                    </div>
-                `;
-            }
-        } catch (error) {
-            console.error('Preview error:', error);
-            previewContent.innerHTML = `
-                <div class="text-center p-8">
-                    <i class="fas fa-exclamation-circle text-red-500 text-5xl mb-4"></i>
-                    <p class="text-red-600">プレビューの読み込みに失敗しました</p>
-                    <p class="text-sm text-gray-500 mt-2">${error.message}</p>
-                </div>
-            `;
-        }
-    }
-</script>
-@endpush
