@@ -20,71 +20,153 @@
             </div>
         </div>
 
-        <!-- ファイル一覧 -->
-        <div id="fileList" class="space-y-4">
-            @foreach($files as $file)
-            <div class="file-item flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100"
-                data-name="{{ $file->file_name }}"
-                data-type="{{ $file->mime_type }}">
-                <div class="flex items-center space-x-4">
-                    <!-- ファイルタイプアイコン -->
-                    <div class="text-2xl">
-                        @if(str_contains($file->mime_type, 'pdf'))
-                        <i class="fas fa-file-pdf text-red-500"></i>
-                        @elseif(str_contains($file->mime_type, 'image'))
-                        <i class="fas fa-file-image text-blue-500"></i>
-                        @else
-                        <i class="fas fa-file text-gray-500"></i>
-                        @endif
-                    </div>
+        <!-- ファイル一覧テーブル -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ファイル名
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            サイズ
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            アップロード日時
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            操作
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($files as $file)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <!-- ファイルタイプアイコン -->
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    @if(Str::contains($file->mime_type, 'pdf'))
+                                    <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
+                                    @elseif(Str::contains($file->mime_type, 'image'))
+                                    <i class="fas fa-file-image text-blue-500 text-2xl"></i>
+                                    @else
+                                    <i class="fas fa-file text-gray-500 text-2xl"></i>
+                                    @endif
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $file->file_name }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ Str::title(Str::after($file->mime_type, '/')) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {{ number_format($file->size / 1024, 2) }} KB
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {{ $file->created_at->format('Y/m/d H:i') }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <!-- ダウンロードボタン -->
+                                <a href="{{ route('projects.files.download', [$project->id, $file->id]) }}"
+                                    class="text-blue-600 hover:text-blue-900 flex items-center"
+                                    data-file-id="{{ $file->id }}"
+                                    onclick="handleDownload(event, this)">
+                                    <i class="fas fa-download mr-1"></i>
+                                    <span>ダウンロード</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-                    <!-- ファイル情報 -->
-                    <div>
-                        <p class="font-medium">{{ $file->file_name }}</p>
-                        <p class="text-sm text-gray-500">
-                            {{ number_format($file->size / 1024, 2) }} KB
-                            • {{ $file->created_at->format('Y/m/d H:i') }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- アクション -->
-                <div class="flex space-x-2">
-                    <a href="{{ route('projects.files.download', [$project->id, $file->id]) }}"
-                        class="text-blue-600 hover:text-blue-800">
-                        <i class="fas fa-download"></i>
-                    </a>
-                </div>
-            </div>
-            @endforeach
+        <!-- ページネーション -->
+        <div class="mt-4">
+            {{ $files->links() }}
         </div>
     </div>
 </div>
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchInput');
-        const typeFilter = document.getElementById('typeFilter');
-        const fileItems = document.querySelectorAll('.file-item');
+    async function handleDownload(event, element) {
+        event.preventDefault();
+        const fileId = element.dataset.fileId;
 
-        function filterFiles() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedType = typeFilter.value;
+        try {
+            // ダウンロード開始時のUI更新
+            element.classList.add('opacity-50', 'cursor-wait');
+            element.querySelector('i').classList.add('fa-spinner', 'fa-spin');
 
-            fileItems.forEach(item => {
-                const fileName = item.dataset.name.toLowerCase();
-                const fileType = item.dataset.type;
-
-                const matchesSearch = fileName.includes(searchTerm);
-                const matchesType = !selectedType || fileType.includes(selectedType);
-
-                item.style.display = matchesSearch && matchesType ? 'flex' : 'none';
+            const response = await fetch(`/api/files/${fileId}/download`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
             });
-        }
 
-        searchInput.addEventListener('input', filterFiles);
-        typeFilter.addEventListener('change', filterFiles);
-    });
+            if (!response.ok) {
+                throw new Error('ダウンロードに失敗しました');
+            }
+
+            // Content-Dispositionヘッダーからファイル名を取得
+            const contentDisposition = response.headers.get('Content-Disposition');
+            const fileName = contentDisposition ?
+                decodeURIComponent(contentDisposition.split('filename=')[1].replace(/['"]/g, '')) :
+                'download';
+
+            // ファイルのダウンロード
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            // 成功通知
+            showToast('ダウンロードが完了しました', 'success');
+
+        } catch (error) {
+            console.error('Download error:', error);
+            showToast(error.message, 'error');
+        } finally {
+            // UI を元に戻す
+            element.classList.remove('opacity-50', 'cursor-wait');
+            element.querySelector('i').classList.remove('fa-spinner', 'fa-spin');
+        }
+    }
+
+    // トースト通知の表示
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white`;
+
+        toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
 </script>
 @endpush

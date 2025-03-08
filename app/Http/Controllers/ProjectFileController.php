@@ -24,9 +24,10 @@ class ProjectFileController extends Controller
 
     public function index(Project $project)
     {
+        $files = ProjectFile::where('project_id', $project->id)->paginate(15);
         return view('projects.files.index', [
             'project' => $project,
-            'files' => $project->files()->latest()->get()
+            'files' => $files
         ]);
     }
 
