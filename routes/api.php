@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\ProjectFileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::prefix('projects/{project}/files')->group(function () {
     Route::post('/', [ProjectFileController::class, 'upload']); // ファイルアップロード

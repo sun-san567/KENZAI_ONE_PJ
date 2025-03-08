@@ -13,7 +13,13 @@ class BuildingMaterialGenreSeeder extends Seeder
     public function run()
     {
         try {
-            DB::beginTransaction();
+            // DB::beginTransaction();
+            $driver = DB::connection()->getDriverName();
+
+            // **🚀 MySQL の場合のみ `SET FOREIGN_KEY_CHECKS=0;` を実行**
+            if ($driver === 'mysql') {
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            }
 
             // 🔹 外部キー制約を無効化し、データをリセット
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
@@ -26,6 +32,11 @@ class BuildingMaterialGenreSeeder extends Seeder
             DB::table('categories')->truncate();
             DB::table('project_categories')->truncate();
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            // **MySQL の場合のみ `SET FOREIGN_KEY_CHECKS=1;` を実行**
+            if ($driver === 'mysql') {
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            }
 
             // 🔹 会社データを作成
             $company_id = DB::table('companies')->insertGetId([
@@ -51,10 +62,12 @@ class BuildingMaterialGenreSeeder extends Seeder
 
             // 🔹 ユーザーを作成（シードデータを適用）
             $users = [
-                ['name' => '山田 太郎', 'email' => 'yamada' . uniqid() . '@kenzai-corp.co.jp', 'department' => '営業部', 'role' => 'admin', 'position' => '営業部長'],
-                ['name' => '鈴木 一郎', 'email' => 'suzuki' . uniqid() . '@kenzai-corp.co.jp', 'department' => '技術部', 'role' => 'manager', 'position' => '技術部長'],
-                ['name' => '佐藤 花子', 'email' => 'sato' . uniqid() . '@kenzai-corp.co.jp', 'department' => '管理部', 'role' => 'user', 'position' => '主任'],
+                ['name' => '山田 太郎', 'email' => 'yamada@kenzai-corp.co.jp', 'department' => '営業部', 'role' => 'admin', 'position' => '営業部長'],
+                ['name' => '鈴木 一郎', 'email' => 'suzuki@kenzai-corp.co.jp', 'department' => '技術部', 'role' => 'manager', 'position' => '技術部長'],
+                ['name' => '佐藤 花子', 'email' => 'sato@kenzai-corp.co.jp', 'department' => '管理部', 'role' => 'user', 'position' => '主任'],
             ];
+
+
             $user_ids = [];
             foreach ($users as $user) {
                 $user_ids[$user['name']] = DB::table('users')->insertGetId([
@@ -147,9 +160,9 @@ class BuildingMaterialGenreSeeder extends Seeder
                 }
             }
 
-            DB::commit();
+            // DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
+            // DB::rollBack();
             Log::error("BuildingMaterialGenreSeeder 実行中にエラー: " . $e->getMessage());
             dd($e->getMessage()); // ✅ デバッグ用
         }

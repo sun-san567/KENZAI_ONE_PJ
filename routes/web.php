@@ -61,8 +61,15 @@ Route::middleware(['auth'])->group(function () {
     // 📌 カテゴリ管理
     Route::resource('categories', CategoryController::class);
 
-    // 📌 ファイル管理
-    Route::post('projects/{project}/files', [ProjectFileController::class, 'upload'])->name('projects.files.upload');
+    // プロジェクトファイル関連のルート
+    Route::prefix('projects/{project}/files')->group(function () {
+        Route::get('/', [ProjectFileController::class, 'index'])->name('projects.files.index');
+        Route::post('/upload', [ProjectFileController::class, 'upload'])->name('projects.files.upload');
+        Route::get('/{file}/download', [ProjectFileController::class, 'download'])->name('projects.files.download');
+    });
+
+    Route::delete('/projects/{project}/files/{file}', [ProjectFileController::class, 'destroy'])
+        ->name('projects.files.destroy');
 
 
     Route::get('/home', function () {

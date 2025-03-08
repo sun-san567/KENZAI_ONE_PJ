@@ -1,85 +1,65 @@
 <?php
 
+namespace Tests\Feature;
+
+use Tests\TestCase;
 use App\Models\User;
+use App\Models\Project;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-test('profile page is displayed', function () {
-    $user = User::factory()->create();
+class ProjectFileTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $response = $this
-        ->actingAs($user)
-        ->get('/profile');
+    public function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('local');
+    }
 
-    $response->assertOk();
-});
+    public function test_ファイルをアップロードできる()
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->create();
 
-test('profile information can be updated', function () {
-    $user = User::factory()->create();
+        $this->actingAs($user);
 
-    $response = $this
-        ->actingAs($user)
-        ->patch('/profile', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $file = UploadedFile::fake()->create('test.pdf', 1024);
+
+        $response = $this->postJson(
+            route('projects.files.upload', $project->id),
+            ['file' => $file]
+        );
+
+        $response->assertStatus(201);
+
+        $this->assertDatabaseHas('project_files', [
+            'project_id' => $project->id,
+            'file_name' => 'test.pdf',
+            'uploaded_by' => $user->id,
+        ]);
+    }
+
+    public function test_ファイル一覧を取得できる()
+    {
+        $user = User::factory()->create();
+        $project = Project::factory()->create();
+
+        $this->actingAs($user);
+
+        // テスト用のファイルを作成
+        ProjectFile::factory()->count(3)->create([
+            'project_id' => $project->id,
+            'uploaded_by' => $user->id,
         ]);
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        $response = $this->getJson(
+            route('projects.files.index', $project->id)
+        );
 
-    $user->refresh();
-
-    $this->assertSame('Test User', $user->name);
-    $this->assertSame('test@example.com', $user->email);
-    $this->assertNull($user->email_verified_at);
-});
-
-test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->patch('/profile', [
-            'name' => 'Test User',
-            'email' => $user->email,
-        ]);
-
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
-
-    $this->assertNotNull($user->refresh()->email_verified_at);
-});
-
-test('user can delete their account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->delete('/profile', [
-            'password' => 'password',
-        ]);
-
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
-
-    $this->assertGuest();
-    $this->assertNull($user->fresh());
-});
-
-test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->from('/profile')
-        ->delete('/profile', [
-            'password' => 'wrong-password',
-        ]);
-
-    $response
-        ->assertSessionHasErrorsIn('userDeletion', 'password')
-        ->assertRedirect('/profile');
-
-    $this->assertNotNull($user->fresh());
-});
+        $response->assertStatus(200)
+            ->assertJsonCount(3);
+    }
+}

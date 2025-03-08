@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Exceptions\MethodNotAllowedHttpException;
 
 class Project extends Model
 {
@@ -72,5 +73,21 @@ class Project extends Model
     public function files()
     {
         return $this->hasMany(ProjectFile::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
+    public function register(): void
+    {
+        $this->reportable(function (MethodNotAllowedHttpException $e) {
+            \Log::error('Method Not Allowed', [
+                'url' => request()->url(),
+                'method' => request()->method(),
+                'route' => request()->route()?->getName()
+            ]);
+        });
     }
 }

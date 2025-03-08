@@ -32,16 +32,17 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
+            'root' => storage_path('app/'), // ✅ 修正
             'serve' => true,
             'throw' => false,
             'report' => false,
         ],
 
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
@@ -58,6 +59,23 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+        ],
+
+        'project_files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/project-files'),
+            'url' => env('APP_URL') . '/project-files',
+            'visibility' => 'private',
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0600,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0700,
+                ],
+            ],
         ],
 
     ],

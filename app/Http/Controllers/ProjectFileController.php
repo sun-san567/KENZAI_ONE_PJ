@@ -6,57 +6,94 @@ use App\Models\Project;
 use App\Models\ProjectFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 
 class ProjectFileController extends Controller
 {
-    /**
-     * 📂 指定プロジェクトのファイル一覧を取得
-     */
+    // ミドルウェアはルートで設定するため、コンストラクタは不要
+    private $allowedMimeTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+
     public function index(Project $project)
     {
-        return response()->json($project->files);
+        return view('projects.files.index', [
+            'project' => $project,
+            'files' => $project->files()->latest()->get()
+        ]);
     }
 
-    /**
-     * 📂 ファイルアップロード処理
-     */
     public function upload(Request $request, Project $project)
     {
+        // 複数ファイルのバリデーション
         $request->validate([
-            'file' => 'required|file|max:10240', // 最大10MB
-            'category' => 'nullable|string',
+            'files' => 'required|array',
+            'files.*' => 'required|file|max:102400', // 100MB制限
         ]);
 
-        $file = $request->file('file');
-        $filePath = $file->store('project_files', 'public'); // `storage/app/public/project_files/` に保存
-        $fileExtension = $file->getClientOriginalExtension();
-        $mimeType = $file->getMimeType();
-        $size = $file->getSize();
+        $uploadedFiles = [];
 
-        $uploadedFile = ProjectFile::create([
-            'project_id' => $project->id,
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $filePath,
-            'mime_type' => $mimeType,
-            'file_extension' => $fileExtension,
-            'size' => $size,
-            'category' => $request->input('category', 'その他'),
-            'preview_path' => $mimeType === 'image/jpeg' || $mimeType === 'image/png' ? $filePath : null,
-            'uploaded_by' => Auth::id(),
-        ]);
+        foreach ($request->file('files') as $file) {
+            $originalName = $file->getClientOriginalName();
+            $fileName = uniqid() . '_' . $originalName;
 
-        return response()->json($uploadedFile, 201);
+            // ファイルの保存
+            $filePath = $file->storeAs('project-files/' . $project->id, $fileName);
+
+            // ファイル情報の保存 - 実際のデータベースカラムに合わせる
+            $projectFile = new ProjectFile([
+                'project_id' => $project->id,
+                'file_name' => $originalName,
+                'file_path' => $filePath,
+                'mime_type' => $file->getMimeType(),
+                'file_extension' => $file->getClientOriginalExtension(),
+                'size' => $file->getSize(),
+                'uploaded_by' => auth()->id() // 現在のユーザーID
+            ]);
+
+            $projectFile->save();
+            $uploadedFiles[] = $originalName;
+        }
+
+        $message = count($uploadedFiles) > 1
+            ? count($uploadedFiles) . 'ファイルがアップロードされました'
+            : $uploadedFiles[0] . 'がアップロードされました';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'redirect' => route('projects.files.index', $project->id)
+            ]);
+        }
+
+        return redirect()->route('projects.files.index', $project->id)
+            ->with('success', $message);
     }
 
-    /**
-     * 🗑 ファイル削除処理
-     */
+    public function download(Project $project, ProjectFile $file)
+    {
+        if (!Storage::exists($file->file_path)) {
+            abort(404);
+        }
+
+        return Storage::download($file->file_path, $file->file_name);
+    }
+
     public function destroy(Project $project, ProjectFile $file)
     {
-        Storage::disk('public')->delete($file->file_path);
+        abort_unless(auth()->user()->can('update', $project), 403);
+
+        Storage::delete($file->file_path);
         $file->delete();
 
-        return response()->json(['message' => 'ファイルが削除されました。']);
+        return response()->json(['message' => 'ファイルを削除しました']);
     }
 }
