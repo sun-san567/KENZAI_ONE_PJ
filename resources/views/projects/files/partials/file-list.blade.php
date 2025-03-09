@@ -121,9 +121,4 @@
             </div>
         </div>
     </div>
-
-    <!-- 右側：検索バー (1カラム幅) -->
-    <div class="lg:col-span-1 order-1 lg:order-2">
-        @include('projects.files.partials.search-area')
-    </div>
 </div>
