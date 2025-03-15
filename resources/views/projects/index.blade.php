@@ -18,7 +18,7 @@
 
     <!-- 📌 案件追加ボタン -->
     <button @click="openModal = true; selectedProject = { categories: [] }"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transition transform hover:bg-blue-700 hover:scale-105">
+        class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transition transform hover:bg-blue-900 hover:scale-105">
         + 案件追加
     </button>
 
@@ -26,59 +26,64 @@
     <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 hide-scrollbar">
         <div class="flex space-x-6 min-w-max px-4">
             @foreach($phases as $phase)
-            <div class="w-96 flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4 min-h-[200px]">
+            <div style="width: 280px; min-width: 280px; max-width: 280px;" class="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-medium text-gray-800">{{ $phase->name }}</h3>
                     <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{{ $phase->projects->count() }}</span>
                 </div>
 
+                @if($phase->projects->count() > 0)
                 <div class="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
-                    @if($phase->projects->count() > 0)
                     @foreach($phase->projects as $project)
-                    <div class="bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors w-full"
+                    <div class="bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors"
                         @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
-                        <h3 class="font-semibold text-gray-800">{{ $project->name }}</h3>
-                        <p class="text-sm text-gray-600 mt-2">{{ $project->description }}</p>
+                        <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
+                        <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p>
 
                         <!-- 取引先名 -->
                         <div class="mt-2 pt-2 border-t border-gray-100">
                             <div class="flex items-center">
-                                <span class="text-xs text-gray-500 w-14">取引先：</span>
-                                <p class="text-sm font-medium text-gray-700 ml-1">{{ $project->client->name ?? '未設定' }}</p>
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">取引先：</span>
+                                <p class="text-sm font-medium text-gray-700 ml-1 truncate">{{ $project->client->name ?? '未設定' }}</p>
                             </div>
                         </div>
 
                         <div class="mt-0.5 space-y-1.5">
                             <div class="flex items-center">
-                                <span class="text-xs text-gray-500 w-14">売上：</span>
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">売上：</span>
                                 <p class="text-sm font-medium text-blue-700 ml-1">¥{{ number_format($project->revenue ?? 0) }}</p>
                             </div>
                             <div class="flex items-center">
-                                <span class="text-xs text-gray-500 w-14">粗利：</span>
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span>
                                 <p class="text-sm font-medium text-green-700 ml-1">¥{{ number_format($project->profit ?? 0) }}</p>
                             </div>
                         </div>
 
                         @if(count($project->categories) > 0)
-                        <div class="grid grid-cols-2 gap-2 mt-3 pt-2 max-h-[4.5rem] overflow-hidden">
-                            @foreach ($project->categories as $category)
-                            <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded truncate">
+                        <div class="flex flex-wrap gap-1 mt-3 pt-2">
+                            @foreach ($project->categories->take(3) as $category)
+                            <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded truncate">
                                 {{ $category->name }}
                             </span>
                             @endforeach
+                            @if(count($project->categories) > 3)
+                            <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded">
+                                +{{ count($project->categories) - 3 }}
+                            </span>
+                            @endif
                         </div>
                         @endif
                     </div>
                     @endforeach
-                    @else
-                    <div class="flex flex-col items-center justify-center h-32 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <p class="mt-2 text-sm text-gray-500">プロジェクトがありません</p>
-                    </div>
-                    @endif
                 </div>
+                @else
+                <div class="border border-dashed border-gray-300 rounded-lg bg-gray-50 min-h-[200px] flex flex-col items-center justify-center" style="width: calc(100% - 8px);">
+                    <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-sm text-gray-500">プロジェクトがありません</p>
+                </div>
+                @endif
             </div>
             @endforeach
         </div>
@@ -254,31 +259,7 @@
                     </div>
                 </form>
             </div>
-
-            <!-- 📌 ファイル管理タブ -->
-            <!-- <div x-show="activeTab === 'files'" class="mt-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">ファイル管理</h3>
-                    <a :href="`/projects/${selectedProject.id}/files`"
-                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                        詳細管理へ
-                    </a>
-                </div> -->
-
-            <!-- 最近のファイル一覧（シンプルな表示） -->
-            <!-- <div class="space-y-2">
-                    <template x-for="file in recentFiles" :key="file.id">
-                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                            <span x-text="file.file_name"></span>
-                            <span x-text="formatDate(file.created_at)"></span>
-                        </div>
-                    </template>
-                </div> -->
-            <!-- </div> -->
-
         </div>
-
-
         @endsection
 
         <style>
@@ -300,3 +281,14 @@
                 background: #aaa;
             }
         </style>
+
+        <script>
+            // 現在の幅を変数として取得し、120%の幅を適用する
+            document.addEventListener('DOMContentLoaded', function() {
+                const phases = document.querySelectorAll('.flex > div[class*="flex-shrink-0"]');
+                if (phases.length > 0) {
+                    const currentWidth = phases[0].offsetWidth;
+                    document.documentElement.style.setProperty('--current-width', currentWidth + 'px');
+                }
+            });
+        </script>
