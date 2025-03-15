@@ -53,9 +53,13 @@
                         <td class="px-6 py-4 text-sm text-gray-800">{{ $company->email }}</td>
                         <td class="px-6 py-4 text-right">
                             <a href="{{ route('company.edit', $company->id) }}"
-                                class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50">
-                                ✏
+                                class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
                             </a>
+
+
                         </td>
                     </tr>
                 </tbody>
@@ -94,21 +98,30 @@
                         <td class="px-6 py-4 text-sm text-gray-800">{{ $department->name }}</td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end space-x-2">
+                                <!-- 編集ボタン -->
                                 <a href="{{ route('departments.edit', $department->id) }}"
-                                    class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50">
-                                    ✏
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                    </svg>
                                 </a>
+
+                                <!-- 削除ボタン -->
                                 <form action="{{ route('departments.destroy', $department->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
                                         onclick="return confirm('この部門を削除しますか？関連するデータも削除されます。');"
-                                        class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-500 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-300">
-                                        🗑
+                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-500 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-md">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
                                     </button>
                                 </form>
                             </div>
                         </td>
+
+
                     </tr>
                     @endforeach
                     @else

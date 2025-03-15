@@ -31,6 +31,13 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('users.index') }}"
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
+                    {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+                    👨‍💼 <span>ユーザー管理</span>
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('phases.index') }}"
                     class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('phases.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
@@ -52,13 +59,7 @@
                     📋 <span>顧客管理</span>
                 </a>
             </li>
-            <li>
-                <a href="{{ route('users.index') }}"
-                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
-                    {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    👨‍💼 <span>ユーザー管理</span>
-                </a>
-            </li>
+
             <li>
                 <a href="{{ route('projects.index') }}"
                     class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 

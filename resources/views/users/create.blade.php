@@ -1,58 +1,78 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto p-6">
-    <h1 class="text-xl font-bold mb-4">ユーザー追加</h1>
+<div class="ml-64 w-[calc(50%-64px)] mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- ヘッダー -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold text-gray-800">ユーザー追加</h1>
+    </div>
 
+    <!-- エラーメッセージ -->
     @if ($errors->any())
-    <div class="bg-red-200 p-2 text-red-700 mb-4 rounded">
-        <ul>
-            @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+    <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-5 rounded-md">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <ul class="text-sm text-red-700">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
     </div>
     @endif
 
-    <form action="{{ route('users.store') }}" method="POST" class="bg-white p-6 shadow rounded-lg">
-        @csrf
+    <!-- ユーザー追加フォーム -->
+    <div class="bg-white shadow-md rounded-lg border border-gray-200 p-6">
+        <form action="{{ route('users.store') }}" method="POST">
+            @csrf
 
-        <div class="mb-4">
-            <label for="department_id" class="block font-bold">部門</label>
-            <select name="department_id" id="department_id" class="w-full p-2 border rounded" required>
-                <option value="">部門を選択</option> <!-- ここが空のままだとバリデーションエラーになる -->
-                @foreach ($departments as $department)
-                <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
-                    {{ $department->name }}
-                </option>
-                @endforeach
-            </select>
-        </div>
+            <!-- 部門選択 -->
+            <div class="mb-4">
+                <label for="department_id" class="block text-sm font-medium text-gray-700">部門 <span class="text-red-500">*</span></label>
+                <select name="department_id" id="department_id" class="w-full border-gray-300 rounded-md p-2 shadow-sm">
+                    <option value="">部門を選択</option>
+                    @foreach ($departments as $department)
+                    <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
+                        {{ $department->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
 
+            <!-- ユーザー名 -->
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">ユーザー名 <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="name" class="w-full border-gray-300 rounded-md p-2 shadow-sm" value="{{ old('name') }}" required>
+            </div>
 
-        <div class="mb-4">
-            <label for="name" class="block font-bold">ユーザー名</label>
-            <input type="text" name="name" id="name" class="w-full p-2 border rounded" value="{{ old('name') }}" required>
-        </div>
+            <!-- メールアドレス -->
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-700">メールアドレス <span class="text-red-500">*</span></label>
+                <input type="email" name="email" id="email" class="w-full border-gray-300 rounded-md p-2 shadow-sm" value="{{ old('email') }}" required>
+            </div>
 
-        <div class="mb-4">
-            <label for="email" class="block font-bold">メールアドレス</label>
-            <input type="email" name="email" id="email" class="w-full p-2 border rounded" value="{{ old('email') }}" required>
-        </div>
+            <!-- 電話番号 -->
+            <div class="mb-4">
+                <label for="phone" class="block text-sm font-medium text-gray-700">電話番号</label>
+                <input type="text" name="phone" id="phone" class="w-full border-gray-300 rounded-md p-2 shadow-sm" value="{{ old('phone') }}">
+            </div>
 
-        <div class="mb-4">
-            <label for="phone" class="block font-bold">電話番号</label>
-            <input type="text" name="phone" id="phone" class="w-full p-2 border rounded" value="{{ old('phone') }}">
-        </div>
-
-        <div class="flex justify-end space-x-4">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                追加
-            </button>
-            <a href="{{ route('users.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
-                戻る
-            </a>
-        </div>
-    </form>
+            <!-- ボタン -->
+            <div class="flex justify-end space-x-4">
+                <a href="{{ route('users.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md">
+                    戻る
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md">
+                    追加
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection
