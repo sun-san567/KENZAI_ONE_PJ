@@ -23,19 +23,20 @@
     </button>
 
     <!-- 📌 フェーズごとの案件一覧 -->
-    <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 hide-scrollbar">
-        <div class="flex space-x-6 min-w-max px-4">
+    <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 hide-scrollbar-x bg-gray-100">
+        <div class="flex space-x-6 min-w-max px-4 pb-4">
             @foreach($phases as $phase)
-            <div style="width: 280px; min-width: 280px; max-width: 280px;" class="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div style="width: 280px; min-width: 280px; max-width: 280px;" class="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-[calc(100vh-150px)] flex flex-col">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-medium text-gray-800">{{ $phase->name }}</h3>
                     <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{{ $phase->projects->count() }}</span>
                 </div>
 
                 @if($phase->projects->count() > 0)
-                <div class="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
-                    @foreach($phase->projects as $project)
-                    <div class="bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors"
+                <div class="space-y-4 overflow-y-auto hide-scrollbar-y pr-2 flex-grow bg-white">
+                    <!-- 最初の5つのプロジェクトを表示 -->
+                    @foreach($phase->projects->take(5) as $index => $project)
+                    <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors"
                         @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
                         <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
                         <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p>
@@ -75,9 +76,66 @@
                         @endif
                     </div>
                     @endforeach
+
+                    <!-- 残りのプロジェクト（最初は非表示） -->
+                    @if($phase->projects->count() > 5)
+                    <div class="hidden-projects hidden">
+                        @foreach($phase->projects->skip(5) as $project)
+                        <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors mt-4"
+                            @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                            <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p>
+
+                            <!-- 取引先名 -->
+                            <div class="mt-2 pt-2 border-t border-gray-100">
+                                <div class="flex items-center">
+                                    <span class="text-xs text-gray-500 w-16 flex-shrink-0">取引先：</span>
+                                    <p class="text-sm font-medium text-gray-700 ml-1 truncate">{{ $project->client->name ?? '未設定' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-0.5 space-y-1.5">
+                                <div class="flex items-center">
+                                    <span class="text-xs text-gray-500 w-16 flex-shrink-0">売上：</span>
+                                    <p class="text-sm font-medium text-blue-700 ml-1">¥{{ number_format($project->revenue ?? 0) }}</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span>
+                                    <p class="text-sm font-medium text-green-700 ml-1">¥{{ number_format($project->profit ?? 0) }}</p>
+                                </div>
+                            </div>
+
+                            @if(count($project->categories) > 0)
+                            <div class="flex flex-wrap gap-1 mt-3 pt-2">
+                                @foreach ($project->categories->take(3) as $category)
+                                <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded truncate">
+                                    {{ $category->name }}
+                                </span>
+                                @endforeach
+                                @if(count($project->categories) > 3)
+                                <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded">
+                                    +{{ count($project->categories) - 3 }}
+                                </span>
+                                @endif
+                            </div>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <!-- もっと見るボタン -->
+                    <div class="flex justify-center mt-2 bg-white">
+                        <button class="show-more-btn text-sm text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors flex items-center">
+                            <span>もっと見る</span>
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    @endif
                 </div>
                 @else
-                <div class="border border-dashed border-gray-300 rounded-lg bg-gray-50 min-h-[200px] flex flex-col items-center justify-center" style="width: calc(100% - 8px);">
+                <div class="border border-dashed border-gray-300 rounded-lg bg-gray-50 flex-grow flex flex-col items-center justify-center" style="width: calc(100% - 8px);">
                     <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -263,32 +321,78 @@
         @endsection
 
         <style>
-            .hide-scrollbar::-webkit-scrollbar {
+            /* 横スクロールバー */
+            .hide-scrollbar-x::-webkit-scrollbar {
                 height: 8px;
             }
 
-            .hide-scrollbar::-webkit-scrollbar-track {
+            .hide-scrollbar-x::-webkit-scrollbar-track {
                 background: #f1f1f1;
                 border-radius: 8px;
             }
 
-            .hide-scrollbar::-webkit-scrollbar-thumb {
+            .hide-scrollbar-x::-webkit-scrollbar-thumb {
                 background: #ccc;
                 border-radius: 8px;
             }
 
-            .hide-scrollbar::-webkit-scrollbar-thumb:hover {
+            .hide-scrollbar-x::-webkit-scrollbar-thumb:hover {
                 background: #aaa;
+            }
+
+            /* 縦スクロールバー */
+            .hide-scrollbar-y::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .hide-scrollbar-y::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 6px;
+            }
+
+            .hide-scrollbar-y::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 6px;
+            }
+
+            .hide-scrollbar-y::-webkit-scrollbar-thumb:hover {
+                background: #aaa;
+            }
+
+            html,
+            body {
+                background-color: #f3f4f6;
             }
         </style>
 
         <script>
-            // 現在の幅を変数として取得し、120%の幅を適用する
             document.addEventListener('DOMContentLoaded', function() {
-                const phases = document.querySelectorAll('.flex > div[class*="flex-shrink-0"]');
-                if (phases.length > 0) {
-                    const currentWidth = phases[0].offsetWidth;
-                    document.documentElement.style.setProperty('--current-width', currentWidth + 'px');
-                }
+                // もっと見るボタンのイベント処理
+                const showMoreButtons = document.querySelectorAll('.show-more-btn');
+
+                showMoreButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const parentContainer = this.closest('.space-y-4');
+                        const hiddenProjects = parentContainer.querySelector('.hidden-projects');
+
+                        if (hiddenProjects.classList.contains('hidden')) {
+                            // 隠れたプロジェクトを表示
+                            hiddenProjects.classList.remove('hidden');
+                            this.querySelector('span').textContent = '折りたたむ';
+                            this.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>';
+                        } else {
+                            // プロジェクトを再度隠す
+                            hiddenProjects.classList.add('hidden');
+                            this.querySelector('span').textContent = 'もっと見る';
+                            this.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>';
+
+                            // ボタンが見えるようにスクロール
+                            this.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'nearest'
+                            });
+                        }
+                    });
+                });
             });
         </script>
