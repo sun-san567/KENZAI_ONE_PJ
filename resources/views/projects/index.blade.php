@@ -161,17 +161,14 @@
 
     <!-- 📌 案件編集モーダル -->
     <div x-show="openModal"
-        class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity"
+        class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity overflow-hidden"
         x-transition.opacity
         @click.self="openModal = false"
-        x-cloak>
+        x-cloak
+        x-effect="if(openModal) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = ''; }">
 
 
         <div class="bg-white p-8 rounded-3xl shadow-lg w-[700px] 　max-h-[75vh] overflow-y-auto transform transition-transform my-6 mx-auto p-6" @click.stop>
-
-
-
-
 
             <!-- タイトル & 閉じるボタン -->
             <div class="flex justify-between items-center mb-6">
