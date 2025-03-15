@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-
 <div class="container mx-auto p-6" x-data="{
     openModal: false,
     selectedProject: null,
@@ -14,26 +13,29 @@
         }
     }
 }">
-    <!-- 📌 案件追加ボタン（修正版） -->
-    <div class="container mx-auto p-6 relative">
+
+    <!-- 📌 PC用: 見出し横に配置 -->
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">案件管理</h2>
         <button @click="openModal = true; selectedProject = { categories: [] }"
             x-show="!openModal"
             x-cloak
-            class="fixed z-[9999] shadow-lg transition hover:shadow-xl hover:scale-105
-               top-4 right-6 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-5 py-3">
-            <span class="text-sm font-semibold">+ 案件追加</span>
+            class="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg shadow-lg transition">
+            + 案件追加
         </button>
     </div>
 
-
-
-    <h1 class="text-xl font-bold text-gray-800 pb-4">案件管理</h1>
-
-
-
+    <!-- 📌 モバイル用: フローティングボタン -->
+    <button @click="openModal = true; selectedProject = { categories: [] }"
+        x-show="!openModal"
+        x-cloak
+        class="fixed md:hidden z-50 shadow-lg transition hover:shadow-xl hover:scale-105
+               bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full">
+        +
+    </button>
 
     <!-- 📌 フェーズごとの案件一覧 -->
-    <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 hide-scrollbar-x bg-gray-100">
+    <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 px-4 hide-scrollbar-x bg-gray-100">
         <div class="flex space-x-6 min-w-max px-4 pb-4">
             @foreach($phases as $phase)
             <div style="width: 280px; min-width: 280px; max-width: 280px;" class="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-[calc(100vh-150px)] flex flex-col">
@@ -49,7 +51,7 @@
                     <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors"
                         @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
                         <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
-                        <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p>
+                        <!-- <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p> -->
 
                         <!-- 取引先名 -->
                         <div class="mt-2 pt-2 border-t border-gray-100">
