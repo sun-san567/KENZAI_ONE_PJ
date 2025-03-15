@@ -20,10 +20,12 @@
                 <h1 :class="sidebarOpen ? 'block' : 'hidden'" class="text-xl font-bold">KENZAI-ONE</h1>
                 <button @click="sidebarOpen = !sidebarOpen" class="text-white hover:text-gray-300 focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
-                        :class="sidebarOpen ? 'rotate-0' : 'rotate-180'"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
                         style="transition: transform 0.3s ease-in-out;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            :d="sidebarOpen 
+                                  ? 'M15 19l-7-7 7-7' 
+                                  : 'M9 5l7 7-7 7'" />
                     </svg>
                 </button>
             </div>
