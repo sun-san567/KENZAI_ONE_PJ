@@ -15,15 +15,48 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- 追加スタイル -->
+    <style>
+        /* サイドバー幅調整 */
+        #sidebar {
+            width: 240px;
+            border-right: 1px solid #e5e7eb;
+            transition: width 0.3s ease-in-out;
+        }
+
+        /* メインコンテンツの余白調整 */
+        #main-content {
+            margin-left: 240px;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        /* モバイル対応 */
+        @media (max-width: 1024px) {
+            #sidebar {
+                width: 56px;
+            }
+
+            #main-content {
+                margin-left: 56px;
+            }
+
+            .sidebar-text {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body class="font-sans antialiased flex">
 
     <!-- サイドバー -->
-    @include('layouts.sidebar')
+    <div id="sidebar" class="fixed h-screen bg-gray-900 text-white shadow-sm">
+        @include('layouts.sidebar')
+    </div>
 
     <!-- メインコンテンツ -->
-    <div class="flex-1 ml-64 min-h-screen bg-gray-100">
+    <div id="main-content" class="min-h-screen bg-gray-100 flex-1">
 
         <!-- ヘッダー -->
         @include('layouts.navigation')
