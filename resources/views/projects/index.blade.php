@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto p-6" x-data="{
+<div class="w-full max-w-[90%] xl:max-w-screen-xl px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mx-auto transition-all duration-300"
+    x-bind:class="sidebarOpen ? 'ml-64' : 'ml-16'"
+    x-data="{
     openModal: false,
     selectedProject: null,
     activeTab: 'edit',
