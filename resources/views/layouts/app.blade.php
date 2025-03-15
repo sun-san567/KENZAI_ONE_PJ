@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>案件管理システム</title>
+    <title>KENZAI-ONE</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -14,6 +14,23 @@
         <!-- サイドバー -->
         <div :class="sidebarOpen ? 'w-64' : 'w-16'"
             class="bg-gray-800 text-white transition-all duration-300 ease-in-out flex flex-col">
+
+            <!-- ユーザープロフィールセクション -->
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-3" x-show="sidebarOpen">
+                        <div class="text-sm font-medium text-white">{{ Auth::user()->name }}</div>
+                        <div class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ロゴ/タイトル -->
             <div class="flex items-center justify-between p-4 border-b border-gray-700">
