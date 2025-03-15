@@ -23,34 +23,65 @@
     </button>
 
     <!-- 📌 フェーズごとの案件一覧 -->
-    <div class="flex space-x-4 overflow-x-auto pb-4 mt-6">
-        @foreach ($phases as $phase)
-        <div class="w-1/5 bg-gray-200 p-5 rounded-lg shadow-lg">
-            <h2 class="text-lg font-bold">{{ $phase->name }}</h2>
-
-            <div class="mt-4 space-y-3">
-                @foreach ($projectsByPhase[$phase->id] ?? [] as $project)
-                <!-- 🖊 チケットクリックで編集モーダル表示 -->
-                <div class="bg-white p-4 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100 transition transform hover:scale-105"
-                    @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
-                    <h3 class="font-semibold">{{ $project->name }}</h3>
-                    <p class="text-sm text-gray-600">{{ $project->description }}</p>
-                    <p class="text-sm font-bold text-blue-600">売上: ¥{{ number_format($project->revenue ?? 0) }}</p>
-                    <p class="text-sm font-bold text-green-600">粗利: ¥{{ number_format($project->profit ?? 0) }}</p>
-
-                    <!-- カテゴリ表示（タグ形式） -->
-                    <div class="flex flex-wrap mt-2">
-                        @foreach ($project->categories as $category)
-                        <span class="bg-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full mr-2 mb-1">
-                            {{ $category->name }}
-                        </span>
-                        @endforeach
-                    </div>
+    <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 hide-scrollbar">
+        <div class="flex space-x-6 min-w-max px-4">
+            @foreach($phases as $phase)
+            <div class="w-96 flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4 min-h-[200px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-medium text-gray-800">{{ $phase->name }}</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{{ $phase->projects->count() }}</span>
                 </div>
-                @endforeach
+
+                <div class="space-y-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
+                    @if($phase->projects->count() > 0)
+                    @foreach($phase->projects as $project)
+                    <div class="bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors w-full"
+                        @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                        <h3 class="font-semibold text-gray-800">{{ $project->name }}</h3>
+                        <p class="text-sm text-gray-600 mt-2">{{ $project->description }}</p>
+
+                        <!-- 取引先名 -->
+                        <div class="mt-2 pt-2 border-t border-gray-100">
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-14">取引先：</span>
+                                <p class="text-sm font-medium text-gray-700 ml-1">{{ $project->client->name ?? '未設定' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-0.5 space-y-1.5">
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-14">売上：</span>
+                                <p class="text-sm font-medium text-blue-700 ml-1">¥{{ number_format($project->revenue ?? 0) }}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-14">粗利：</span>
+                                <p class="text-sm font-medium text-green-700 ml-1">¥{{ number_format($project->profit ?? 0) }}</p>
+                            </div>
+                        </div>
+
+                        @if(count($project->categories) > 0)
+                        <div class="grid grid-cols-2 gap-2 mt-3 pt-2 max-h-[4.5rem] overflow-hidden">
+                            @foreach ($project->categories as $category)
+                            <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded truncate">
+                                {{ $category->name }}
+                            </span>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                    @else
+                    <div class="flex flex-col items-center justify-center h-32 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-500">プロジェクトがありません</p>
+                    </div>
+                    @endif
+                </div>
             </div>
+            @endforeach
         </div>
-        @endforeach
     </div>
 
     <!-- 📌 案件編集モーダル -->
@@ -80,12 +111,12 @@
                     :class="activeTab === 'edit' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'">
                     案件編集
                 </button>
-                <button @click="activeTab = 'files'"
+                <!-- <button @click="activeTab = 'files'"
                     class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
                     :class="activeTab === 'files' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'"
                     x-show="selectedProject">
                     ファイル管理
-                </button>
+                </button> -->
             </div>
 
             <!-- 📌 案件編集タブ -->
@@ -250,110 +281,22 @@
 
         @endsection
 
-        <script>
-            //     document.addEventListener('alpine:init', () => {
-            //         Alpine.data('fileManager', (projectId) => ({
-            //             projectFiles: [],
-            //             fileCategory: 'その他',
+        <style>
+            .hide-scrollbar::-webkit-scrollbar {
+                height: 8px;
+            }
 
-            //             // ✅ ファイル一覧を取得
-            //             fetchFiles() {
-            //                 if (!projectId) return;
-            //                 console.log("📂 ファイル一覧を取得開始...");
+            .hide-scrollbar::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 8px;
+            }
 
-            //                 fetch(`/api/projects/${projectId}/files`)
-            //                     .then(res => {
-            //                         console.log("📩 APIレスポンス (fetchFiles):", res);
-            //                         if (!res.ok) throw new Error("⚠ ファイル一覧の取得に失敗しました");
-            //                         return res.json();
-            //                     })
-            //                     .then(data => {
-            //                         console.log("✅ 取得したファイル一覧:", data);
-            //                         this.projectFiles = data;
-            //                         console.log("🔄 更新後のファイルリスト:", this.projectFiles);
-            //                     })
-            //                     .catch(error => console.error("❌ エラー:", error));
-            //             },
+            .hide-scrollbar::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 8px;
+            }
 
-            //             // ✅ ファイルをアップロード
-            //             uploadFile(event) {
-            //                 let formData = new FormData();
-            //                 let fileInput = event.target.files[0];
-            //                 let category = document.getElementById('category').value;
-
-            //                 if (!fileInput) {
-            //                     document.getElementById('uploadStatus').textContent = "ファイルが選択されていません";
-            //                     return;
-            //                 }
-
-            //                 formData.append('file', fileInput);
-            //                 formData.append('category', category);
-
-            //                 // ✅ デバッグ出力
-            //                 console.log("送信データ:", formData.get('file'), formData.get('category'));
-
-            //                 fetch(`/api/projects/${projectId}/files`, {
-            //                         method: 'POST',
-            //                         body: formData,
-            //                         headers: {
-            //                             'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
-            //                         }
-            //                     })
-            //                     .then(res => {
-            //                         if (!res.ok) throw new Error("アップロードに失敗しました");
-            //                         return res.json();
-            //                     })
-            //                     .then(data => {
-            //                         console.log("アップロード成功:", data);
-            //                         this.fetchFiles();
-            //                         document.getElementById('uploadStatus').innerText = "✅ アップロード成功！";
-            //                         setTimeout(() => {
-            //                             document.getElementById('uploadStatus').innerText = "";
-            //                         }, 3000);
-            //                         document.getElementById('uploadForm').reset();
-            //                     })
-            //                     .catch(error => {
-            //                         console.error("アップロードエラー:", error);
-            //                         document.getElementById('uploadStatus').textContent = "アップロード失敗...";
-            //                     })
-            //             },
-
-            //             // ✅ ファイル削除処理
-            //             deleteFile(fileId) {
-            //                 console.log(`🗑 削除リクエスト: ファイルID ${fileId}`);
-
-            //                 fetch(`/api/projects/${projectId}/files/${fileId}`, {
-            //                         method: 'DELETE'
-            //                     })
-            //                     .then(res => {
-            //                         console.log("📩 APIレスポンス (deleteFile):", res);
-            //                         if (!res.ok) throw new Error("⚠ 削除に失敗しました");
-            //                         return res.json();
-            //                     })
-            //                     .then(() => {
-            //                         console.log(`✅ ファイルID ${fileId} が削除されました`);
-            //                         this.projectFiles = this.projectFiles.filter(f => f.id !== fileId);
-            //                         console.log("🔄 更新後のファイルリスト:", this.projectFiles);
-            //                     })
-            //                     .catch(error => console.error("❌ 削除エラー:", error));
-            //             },
-
-            //             // ✅ ファイルサイズのフォーマット
-            //             formatFileSize(size) {
-            //                 const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-            //                 let unitIndex = 0;
-            //                 while (size >= 1024 && unitIndex < units.length - 1) {
-            //                     size /= 1024;
-            //                     unitIndex++;
-            //                 }
-            //                 return `${size.toFixed(2)} ${units[unitIndex]}`;
-            //             },
-
-            //             // ✅ 日付のフォーマット
-            //             formatDate(date) {
-            //                 return new Date(date).toLocaleDateString();
-            //             }
-            //         }));
-            //     });
-            // 
-        </script>
+            .hide-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #aaa;
+            }
+        </style>
