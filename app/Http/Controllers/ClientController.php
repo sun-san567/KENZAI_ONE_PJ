@@ -68,4 +68,23 @@ class ClientController extends Controller
         $client->delete();
         return redirect()->route('clients.index')->with('success', 'クライアントを削除しました');
     }
+    public function update(Request $request, Client $client)
+    {
+        // バリデーション
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'department_id' => 'nullable|exists:departments,id',
+            'user_id' => 'nullable|exists:users,id',
+        ]);
+
+        // クライアント情報の更新
+        $client->update([
+            'name' => $request->name,
+            'department_id' => $request->department_id,
+            'user_id' => $request->user_id,
+        ]);
+
+        // 成功メッセージを設定し、クライアント一覧ページへリダイレクト
+        return redirect()->route('clients.index')->with('success', 'クライアント情報を更新しました。');
+    }
 }
