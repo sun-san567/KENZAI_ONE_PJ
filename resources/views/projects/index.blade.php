@@ -174,7 +174,11 @@
                 <!-- タイトル & 閉じるボタン -->
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold" x-text="selectedProject ? '案件編集' : '案件追加'"></h2>
-                    <button @click="openModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                    <button @click="openModal = false" class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-700 hover:bg-red-100 hover:text-red-600 transition-colors focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
                 <!-- タブ切り替え -->
@@ -182,14 +186,14 @@
                     <button @click="activeTab = 'edit'"
                         class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
                         :class="activeTab === 'edit' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'">
-                        案件編集
+                        案件詳細
                     </button>
-                    <button @click="activeTab = 'files'"
+                    <!-- <button @click="activeTab = 'files'"
                         class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
                         :class="activeTab === 'files' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'"
                         x-show="selectedProject">
                         ファイル管理
-                    </button>
+                    </button> -->
                 </div>
 
                 <!-- 📌 案件編集タブ -->
@@ -200,21 +204,22 @@
                             <input type="hidden" name="_method" value="PUT">
                         </template>
 
-                        <div class="grid grid-cols-1 gap-8">
+                        <div class="grid grid-cols-1 gap-6">
                             <!-- 案件情報 -->
-                            <div>
-                                <label class="block font-medium mb-2">案件名</label>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">案件名</label>
                                 <input type="text" name="name"
-                                    class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 shadow-md"
+                                    class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
                                     x-model="selectedProject ? selectedProject.name : ''">
                             </div>
 
-                            <div class="grid grid-cols-2 gap-8">
+
+                            <div class="grid grid-cols-2 gap-6">
                                 <!-- フェーズ -->
-                                <div>
-                                    <label class="block font-medium mb-1 text-sm">フェーズ</label>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">フェーズ</label>
                                     <select name="phase_id"
-                                        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 shadow-md">
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
                                         @foreach ($phases as $phase)
                                         <option value="{{ $phase->id }}"
                                             x-bind:selected="selectedProject && selectedProject.phase_id == {{ $phase->id }}">
@@ -225,10 +230,10 @@
                                 </div>
 
                                 <!-- 顧客 -->
-                                <div>
-                                    <label class="block font-medium mb-1 text-sm">顧客</label>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">顧客</label>
                                     <select name="client_id"
-                                        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 shadow-md">
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
                                         @foreach ($clients as $client)
                                         <option value="{{ $client->id }}"
                                             x-bind:selected="selectedProject && selectedProject.client_id == {{ $client->id }}">
@@ -240,28 +245,29 @@
                             </div>
 
                             <!-- 説明 -->
-                            <div>
-                                <label class="block font-medium mb-2">説明</label>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">説明</label>
                                 <textarea name="description"
-                                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 h-32 shadow-md"
+                                    class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 h-32"
                                     x-model="selectedProject ? selectedProject.description : ''"></textarea>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+
+                            <div class="grid grid-cols-2 gap-6">
                                 <!-- 売上 -->
-                                <div>
-                                    <label class="block font-medium mb-1 text-sm">売上</label>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">売上</label>
                                     <input type="number" name="revenue" step="1" min="0"
-                                        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 text-right shadow-md"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 text-right"
                                         :value="selectedProject ? Math.floor(selectedProject.revenue) : ''"
                                         @input="selectedProject ? selectedProject.revenue = Math.floor($event.target.value) || 0 : ''">
                                 </div>
 
                                 <!-- 粗利 -->
-                                <div>
-                                    <label class="block font-medium mb-1 text-sm">粗利</label>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">粗利</label>
                                     <input type="number" name="profit" step="1" min="0"
-                                        class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 text-right shadow-md"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 text-right"
                                         :value="selectedProject ? Math.floor(selectedProject.profit) : ''"
                                         @input="selectedProject ? selectedProject.profit = Math.floor($event.target.value) || 0 : ''">
                                 </div>
