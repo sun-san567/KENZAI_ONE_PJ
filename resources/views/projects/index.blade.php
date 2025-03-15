@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 <div class="container mx-auto p-6" x-data="{
     openModal: false,
     selectedProject: null,
@@ -13,14 +14,23 @@
         }
     }
 }">
+    <!-- 📌 案件追加ボタン（修正版） -->
+    <div class="container mx-auto p-6 relative">
+        <button @click="openModal = true; selectedProject = { categories: [] }"
+            x-show="!openModal"
+            x-cloak
+            class="fixed z-[9999] shadow-lg transition hover:shadow-xl hover:scale-105
+               top-4 right-6 rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-5 py-3">
+            <span class="text-sm font-semibold">+ 案件追加</span>
+        </button>
+    </div>
 
-    <h2 class="text-2xl font-bold mb-6">案件管理</h2>
 
-    <!-- 📌 案件追加ボタン -->
-    <button @click="openModal = true; selectedProject = { categories: [] }"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transition transform hover:bg-blue-900 hover:scale-105">
-        + 案件追加
-    </button>
+
+    <h1 class="text-xl font-bold text-gray-800 pb-4">案件管理</h1>
+
+
+
 
     <!-- 📌 フェーズごとの案件一覧 -->
     <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 hide-scrollbar-x bg-gray-100">
@@ -396,3 +406,4 @@
                 });
             });
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
