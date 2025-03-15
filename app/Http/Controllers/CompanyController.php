@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Company;
+use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
     /**
-     * 会社情報を取得
+     * 会社情報と部門情報を取得
      */
     public function index()
     {
@@ -22,17 +23,18 @@ class CompanyController extends Controller
             return redirect()->route('company.create')->with('error', '会社情報が登録されていません。');
         }
 
-        return view('company.index', compact('company')); // 修正: compact('companies') → compact('company')
+        // 自社に紐づく部門のみを取得
+        $departments = Department::where('company_id', $company->id)->orderBy('name')->get();
+
+        return view('company.index', compact('company', 'departments'));
     }
-
-
 
     /**
      * 会社情報作成画面
      */
     public function create()
     {
-        return view('companies.create');
+        return view('company.create');
     }
 
     /**
@@ -41,7 +43,7 @@ class CompanyController extends Controller
     public function store(Request $request)
     {
         if (Company::count() > 0) {
-            return redirect()->route('companies.index')->with('error', '会社情報は1つのみ作成可能です。');
+            return redirect()->route('company.index')->with('error', '会社情報は1つのみ作成可能です。');
         }
 
         $request->validate([
@@ -51,9 +53,14 @@ class CompanyController extends Controller
             'email' => 'nullable|email|max:255',
         ]);
 
-        Company::create($request->only(['name', 'address', 'phone', 'email']));
+        $company = Company::create($request->only(['name', 'address', 'phone', 'email']));
 
-        return redirect()->route('companies.index')->with('success', '会社情報が登録されました。');
+        // 作成したユーザーを会社に紐づける
+        $user = Auth::user();
+        $user->company_id = $company->id;
+        $user->save();
+
+        return redirect()->route('company.index')->with('success', '会社情報が登録されました。');
     }
 
     /**
@@ -61,9 +68,11 @@ class CompanyController extends Controller
      */
     public function edit(Company $company)
     {
-        return view('company.edit', compact('company'));
-    }
+        // 自社に紐づく部門も取得して編集画面に渡す
+        $departments = Department::where('company_id', $company->id)->orderBy('name')->get();
 
+        return view('company.edit', compact('company', 'departments'));
+    }
 
     /**
      * 会社情報を更新
@@ -87,6 +96,6 @@ class CompanyController extends Controller
      */
     public function destroy(Company $company)
     {
-        return redirect()->route('companies.index')->with('error', '会社情報は削除できません。');
+        return redirect()->route('company.index')->with('error', '会社情報は削除できません。');
     }
 }
