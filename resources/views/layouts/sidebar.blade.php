@@ -24,31 +24,10 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('clients.index') }}"
-                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
-                    {{ request()->routeIs('clients.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    📋 <span>顧客管理</span>
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('company.index') }}"
                     class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('company.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     🏢 <span>会社情報管理</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('departments.index') }}"
-                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
-                    {{ request()->routeIs('departments.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    👥 <span>部門管理</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('projects.index') }}"
-                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
-                    {{ request()->routeIs('projects.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    📂 <span>PJ管理</span>
                 </a>
             </li>
             <li>
@@ -59,19 +38,36 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('users.index') }}"
-                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
-                    {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
-                    👨‍💼 <span>管理</span>
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('categories.index') }}"
                     class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
                     {{ request()->routeIs('categories.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
                     🔖 <span>カテゴリ管理</span>
                 </a>
             </li>
+
+            <li>
+                <a href="{{ route('clients.index') }}"
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
+                    {{ request()->routeIs('clients.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+                    📋 <span>顧客管理</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('users.index') }}"
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
+                    {{ request()->routeIs('users.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+                    👨‍💼 <span>ユーザー管理</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('projects.index') }}"
+                    class="block px-4 py-2 flex items-center space-x-2 text-white rounded-md 
+                    {{ request()->routeIs('projects.*') ? 'bg-blue-600' : 'hover:bg-gray-800' }}">
+                    📂 <span>PJ管理</span>
+                </a>
+            </li>
+
+
         </ul>
     </nav>
 </aside>

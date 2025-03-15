@@ -41,7 +41,7 @@ class DepartmentController extends Controller
 
         Department::create($request->all());
 
-        return redirect()->route('departments.index')->with('success', '部門が作成されました。');
+        return redirect()->route('company.index')->with('success', '部門が作成されました。');
     }
 
     // 編集画面
@@ -64,12 +64,12 @@ class DepartmentController extends Controller
             'company_id' => $request->company_id,
         ]);
 
-        return redirect()->route('departments.index')->with('success', '部門情報を更新しました！');
+        return redirect()->route('company.index')->with('success', '部門情報を更新しました！');
     }
 
     public function destroy(Department $department)
     {
         $department->delete();
-        return redirect()->route('departments.index')->with('success', '部門が削除されました。');
+        return redirect()->route('company.index')->with('success', '部門が削除されました。');
     }
 }
