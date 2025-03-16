@@ -56,7 +56,7 @@
             <div class="text-center mt-4">
                 <button type="submit"
                     id="uploadBtn"
-                    class="px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:shadow-lg hover:bg-blue-700 transition-all duration-300 ease-in-out flex items-center mx-auto">
+                    class="px-6 py-3 bg-blue-500 text-white rounded-md shadow-md hover:shadow-lg hover:bg-blue-700 transition-all duration-300 ease-in-out flex items-center mx-auto">
                     <i class="fas fa-upload text-lg mr-1.5"></i>
                     アップロード
                 </button>
@@ -95,47 +95,60 @@
         @endif
 
         <div class="mt-6 pt-4 border-t border-gray-200">
-            <form id="fileSearchForm" class="grid grid-cols-12 gap-2">
-                <div class="col-span-7">
+            <form id="fileSearchForm" class="max-w-2xl mx-auto flex gap-4 items-center">
+                <!-- 検索ボックス -->
+                <div class="relative flex-grow">
+                    <i class="fas fa-search absolute left-3 top-3.5 text-gray-600"></i>
                     <input
                         type="text"
                         id="searchInput"
                         name="search"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        placeholder="ファイル名を検索...">
+                        class="w-full border border-gray-400 bg-gray-50 rounded-md pl-10 p-3 text-base shadow-sm focus:ring-2 focus:ring-blue-500"
+                        placeholder="検索キーワードを入力（例: PDF）">
                 </div>
 
-                <div class="col-span-3">
+                <!-- ファイル種別フィルター -->
+                <!-- カスタムスタイル適用したドロップダウン -->
+                <div class="relative">
                     <select
                         id="fileTypeSelect"
                         name="type"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                        <option value="">すべて</option>
-                        <option value="pdf">PDF</option>
-                        <option value="doc">Word</option>
-                        <option value="xls">Excel</option>
-                        <option value="img">画像</option>
+                        class="border border-gray-400 bg-gray-50 rounded-md p-3.5 text-lg shadow-sm max-w-[220px] appearance-none pr-10">
+                        <option value="">📂 すべて</option>
+                        <option value="pdf">📄 PDF</option>
+                        <option value="doc">📝 Word</option>
+                        <option value="xls">📊 Excel</option>
+                        <option value="img">🖼️ 画像</option>
                     </select>
+
+                    <!-- カスタム矢印アイコン -->
+                    <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
                 </div>
 
-                <div class="col-span-2">
-                    <button
-                        type="submit"
-                        class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center">
-                        <i class="fas fa-search">検索する</i>
-                    </button>
-                </div>
+
+                <!-- 検索ボタン -->
+                <button
+                    type="submit"
+                    class="w-[220px] py-3 bg-blue-500 text-white text-lg font-semibold rounded-md shadow-md hover:bg-blue-600 hover:shadow-lg flex items-center justify-center gap-2 transition-all duration-300">
+                    <i class="fas fa-search"></i>検索する
+                    　　
+                </button>
+
             </form>
 
-            <div id="searchStatus" class="mt-1 text-xs text-gray-500 flex items-center">
-                <div id="searchSpinner" class="hidden">
+            <!-- 検索結果表示 -->
+            <div id="searchStatus" class="mt-2 text-xs text-gray-500 text-center">
+                <div id="searchSpinner" class="hidden flex items-center">
                     <i class="fas fa-spinner fa-spin mr-1 text-blue-500"></i>検索中...
                 </div>
                 <div id="searchResultInfo" class="hidden">
-                    <span id="resultCount">0</span>件のファイルが見つかりました
+                    <span id="resultCount">0</span> 件のファイルが見つかりました
                 </div>
             </div>
         </div>
+
+
+
     </div>
 </div>
 
