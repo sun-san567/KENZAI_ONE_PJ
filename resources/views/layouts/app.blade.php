@@ -126,10 +126,12 @@
             <!-- ヘッダー -->
             <header class="bg-white shadow">
                 <div class="w-full max-w-[1280px] 2xl:max-w-[1536px] mx-auto py-4 px-4 sm:px-6 lg:px-8">
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        {{ Auth::user()->company->name ?? '会社未設定' }} - {{ Auth::user()->department->name ?? '部門未設定' }}
+                    <h1 class="text-1xl font-bold text-gray-900 tracking-normal leading-snug drop-shadow-sm">
+                        {{ Auth::user()->company->name ?? '会社未設定' }}
+                        <span class="text-sm font-medium text-gray-600">- {{ Auth::user()->department->name ?? '部門未設定' }}</span>
                     </h1>
                 </div>
+
             </header>
 
 
