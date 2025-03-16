@@ -15,4 +15,20 @@ class Company extends Model
         'phone',
         'email',
     ];
+
+    /**
+     * この会社に所属するユーザーを取得
+     */
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+
+    /**
+     * この会社の部門を取得
+     */
+    public function departments()
+    {
+        return $this->hasMany(Department::class);
+    }
 }
