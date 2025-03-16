@@ -53,13 +53,21 @@
                     <div id="totalSize" class="text-right text-sm text-gray-600"></div>
                 </div>
             </div>
+            <div class="text-center mt-4">
+                <button type="submit"
+                    id="uploadBtn"
+                    class="px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:shadow-lg hover:bg-blue-700 transition-all duration-300 ease-in-out flex items-center mx-auto">
+                    <i class="fas fa-upload text-lg mr-1.5"></i>
+                    アップロード
+                </button>
+            </div>
 
-            <button type="submit"
-                id="uploadBtn"
-                class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
-                <i class="fas fa-upload mr-2"></i>
-                アップロード
-            </button>
+
+
+
+
+
+
 
             <div id="uploadStatus" class="hidden text-center py-2"></div>
 
