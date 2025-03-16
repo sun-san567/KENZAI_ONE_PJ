@@ -16,6 +16,9 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->decimal('revenue', 10, 2)->default(0);
             $table->decimal('profit', 10, 2)->default(0);
+            $table->date('start_date')->nullable(); // 着工日
+            $table->date('end_date')->nullable();   // 竣工日
+            $table->date('estimate_deadline')->nullable(); // 見積期限
             $table->timestamps();
         });
 
