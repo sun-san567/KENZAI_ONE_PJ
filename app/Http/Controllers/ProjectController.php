@@ -6,27 +6,65 @@ use App\Models\Client;
 use App\Models\Phase;
 use App\Models\Category;
 use App\Models\Project;
+use App\Models\Department;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
     /**
-     * 案件一覧を表示
+     * プロジェクト一覧を表示
      */
-    public function index()
+    public function index(Request $request)
     {
-        $phases = Phase::all();
-        $clients = Client::all();
-        $categories = Category::all();
+        // 現在のログインユーザーの会社ID
+        $companyId = auth()->user()->company_id;
+        $userId = auth()->id();
 
-        // ✅ `$projects` を `phase_id` をキーにした配列に変換
-        $projects = Project::with(['phase', 'categories', 'client'])->get();
-        $projectsByPhase = [];
-        foreach ($projects as $project) {
-            $projectsByPhase[$project->phase_id][] = $project;
+        // 基本クエリ - 自社のクライアントに紐づくプロジェクトのみ
+        $query = Project::with(['client', 'phase'])
+            ->whereHas('client', function ($q) use ($companyId) {
+                $q->where('company_id', $companyId);
+            });
+
+        // 検索条件適用
+        if ($request->filled('phase_id')) {
+            $query->where('phase_id', $request->phase_id);
         }
 
-        return view('projects.index', compact('phases', 'clients', 'categories', 'projectsByPhase'));
+        if ($request->filled('client_id')) {
+            $query->where('client_id', $request->client_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('client', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $projects = $query->orderBy('updated_at', 'desc')->paginate(10);
+
+        // カテゴリを自社のものだけに制限
+        $categories = Category::where('company_id', $companyId)->get();
+
+        // フェーズも自社の部門に限定
+        $departmentIds = Department::where('company_id', $companyId)->pluck('id');
+        $phases = Phase::whereIn('department_id', $departmentIds)->get();
+
+        // クライアントも自社のみ
+        $clients = Client::where('company_id', $companyId)->get();
+
+        // プロジェクトごとのカテゴリ情報をロード
+        foreach ($projects as $project) {
+            $project->load(['categories' => function ($query) use ($companyId) {
+                $query->where('company_id', $companyId);
+            }]);
+        }
+
+        return view('projects.index', compact('projects', 'categories', 'phases', 'clients'));
     }
 
     /**

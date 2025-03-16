@@ -18,14 +18,14 @@ class PhaseController extends Controller
         $user = auth()->user();
         $companyId = $user->company_id;
         $userDepartmentId = $user->department_id;
-        
+
         // 管理者の場合は会社内の全フェーズ、それ以外は自部門のフェーズのみ
         if ($user->role === 'admin') {
             // 管理者: 自社の全部門のフェーズを表示
             $departmentIds = Department::where('company_id', $companyId)
                 ->pluck('id')
                 ->toArray();
-                
+
             $phases = Phase::whereIn('department_id', $departmentIds)
                 ->orderBy('order', 'asc')
                 ->get();
@@ -35,10 +35,10 @@ class PhaseController extends Controller
                 ->orderBy('order', 'asc')
                 ->get();
         }
-        
+
         // 部門名も表示できるようにリレーションを読み込む
         $phases->load('department');
-        
+
         return view('phases.index', compact('phases'));
     }
 
