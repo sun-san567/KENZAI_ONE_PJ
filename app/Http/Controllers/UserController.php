@@ -76,13 +76,29 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $departments = Department::all();
-        $query = User::with('department');
+        // 現在のログインユーザーの会社IDを取得
+        $companyId = auth()->user()->company_id;
 
+        // 自社の部門のみを取得
+        $departments = Department::where('company_id', $companyId)->get();
+
+        // 自社のユーザーのみに制限
+        $query = User::with('department')
+            ->where('company_id', $companyId);
+
+        // 部門による絞り込み（自社の部門IDかチェック）
         if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
+            // 部門IDが自社のものか確認
+            $departmentBelongsToCompany = Department::where('id', $request->department_id)
+                ->where('company_id', $companyId)
+                ->exists();
+
+            if ($departmentBelongsToCompany) {
+                $query->where('department_id', $request->department_id);
+            }
         }
 
+        // 名前による検索
         if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
