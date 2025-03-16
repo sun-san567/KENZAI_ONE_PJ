@@ -30,7 +30,7 @@
                             <div class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</div>
                             <div class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</div>
                         </div>
-                        
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
