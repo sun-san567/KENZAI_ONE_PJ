@@ -10,8 +10,11 @@ return new class extends Migration {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade'); // 会社ID（外部キー）
-            $table->string('name')->unique()->comment('部門名');
+            $table->string('name')->comment('部門名');
             $table->timestamps();
+
+            // 🔹 修正: `company_id` と `name` の組み合わせでユニークにする
+            $table->unique(['company_id', 'name']);
         });
     }
 
