@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto p-6" x-data="{
+<div class="w-full max-w-[90%] xl:max-w-screen-xl px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mx-auto transition-all duration-300"
+    x-bind:class="sidebarOpen ? 'ml-64' : 'ml-16'"
+    x-data="{
     openModal: false,
     selectedProject: null,
     activeTab: 'edit',
@@ -14,320 +16,405 @@
     }
 }">
 
-    <h2 class="text-2xl font-bold mb-6">案件管理</h2>
+    <!-- 📌 PC用: 見出し横に配置 -->
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">案件管理</h2>
+        <button @click="openModal = true; selectedProject = { categories: [] }"
+            x-show="!openModal"
+            x-cloak
+            class="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg shadow-lg transition">
+            + 案件追加
+        </button>
+    </div>
 
-    <!-- 📌 案件追加ボタン -->
+    <!-- 📌 モバイル用: フローティングボタン -->
     <button @click="openModal = true; selectedProject = { categories: [] }"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transition transform hover:bg-blue-700 hover:scale-105">
-        + 案件追加
+        x-show="!openModal"
+        x-cloak
+        class="fixed md:hidden z-50 shadow-lg transition hover:shadow-xl hover:scale-105
+               bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full">
+        +
     </button>
 
     <!-- 📌 フェーズごとの案件一覧 -->
-    <div class="flex space-x-4 overflow-x-auto pb-4 mt-6">
-        @foreach ($phases as $phase)
-        <div class="w-1/5 bg-gray-200 p-5 rounded-lg shadow-lg">
-            <h2 class="text-lg font-bold">{{ $phase->name }}</h2>
+    <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 px-4 hide-scrollbar-x bg-gray-100">
+        <div class="flex space-x-6 min-w-max px-4 pb-4">
+            @foreach($phases as $phase)
+            <div style="width: 280px; min-width: 280px; max-width: 280px;" class="flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-[calc(100vh-150px)] flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-medium text-gray-800">{{ $phase->name }}</h3>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{{ $phase->projects->count() }}</span>
+                </div>
 
-            <div class="mt-4 space-y-3">
-                @foreach ($projectsByPhase[$phase->id] ?? [] as $project)
-                <!-- 🖊 チケットクリックで編集モーダル表示 -->
-                <div class="bg-white p-4 rounded-lg shadow-lg cursor-pointer hover:bg-gray-100 transition transform hover:scale-105"
-                    @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
-                    <h3 class="font-semibold">{{ $project->name }}</h3>
-                    <p class="text-sm text-gray-600">{{ $project->description }}</p>
-                    <p class="text-sm font-bold text-blue-600">売上: ¥{{ number_format($project->revenue ?? 0) }}</p>
-                    <p class="text-sm font-bold text-green-600">粗利: ¥{{ number_format($project->profit ?? 0) }}</p>
+                @if($phase->projects->count() > 0)
+                <div class="space-y-4 overflow-y-auto hide-scrollbar-y pr-2 flex-grow bg-white">
+                    <!-- 最初の5つのプロジェクトを表示 -->
+                    @foreach($phase->projects->take(5) as $index => $project)
+                    <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors"
+                        @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                        <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
+                        <!-- <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p> -->
 
-                    <!-- カテゴリ表示（タグ形式） -->
-                    <div class="flex flex-wrap mt-2">
-                        @foreach ($project->categories as $category)
-                        <span class="bg-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full mr-2 mb-1">
-                            {{ $category->name }}
-                        </span>
+                        <!-- 取引先名 -->
+                        <div class="mt-2 pt-2 border-t border-gray-100">
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">取引先：</span>
+                                <p class="text-sm font-medium text-gray-700 ml-1 truncate">{{ $project->client->name ?? '未設定' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-0.5 space-y-1.5">
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">売上：</span>
+                                <p class="text-sm font-medium text-blue-700 ml-1">¥{{ number_format($project->revenue ?? 0) }}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span>
+                                <p class="text-sm font-medium text-green-700 ml-1">¥{{ number_format($project->profit ?? 0) }}</p>
+                            </div>
+                        </div>
+
+                        @if(count($project->categories) > 0)
+                        <div class="flex flex-wrap gap-1 mt-3 pt-2">
+                            @foreach ($project->categories->take(3) as $category)
+                            <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded truncate">
+                                {{ $category->name }}
+                            </span>
+                            @endforeach
+                            @if(count($project->categories) > 3)
+                            <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded">
+                                +{{ count($project->categories) - 3 }}
+                            </span>
+                            @endif
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+
+                    <!-- 残りのプロジェクト（最初は非表示） -->
+                    @if($phase->projects->count() > 5)
+                    <div class="hidden-projects hidden">
+                        @foreach($phase->projects->skip(5) as $project)
+                        <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors mt-4"
+                            @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                            <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
+                            <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p>
+
+                            <!-- 取引先名 -->
+                            <div class="mt-2 pt-2 border-t border-gray-100">
+                                <div class="flex items-center">
+                                    <span class="text-xs text-gray-500 w-16 flex-shrink-0">取引先：</span>
+                                    <p class="text-sm font-medium text-gray-700 ml-1 truncate">{{ $project->client->name ?? '未設定' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-0.5 space-y-1.5">
+                                <div class="flex items-center">
+                                    <span class="text-xs text-gray-500 w-16 flex-shrink-0">売上：</span>
+                                    <p class="text-sm font-medium text-blue-700 ml-1">¥{{ number_format($project->revenue ?? 0) }}</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span>
+                                    <p class="text-sm font-medium text-green-700 ml-1">¥{{ number_format($project->profit ?? 0) }}</p>
+                                </div>
+                            </div>
+
+                            @if(count($project->categories) > 0)
+                            <div class="flex flex-wrap gap-1 mt-3 pt-2">
+                                @foreach ($project->categories->take(3) as $category)
+                                <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded truncate">
+                                    {{ $category->name }}
+                                </span>
+                                @endforeach
+                                @if(count($project->categories) > 3)
+                                <span class="inline-flex bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded">
+                                    +{{ count($project->categories) - 3 }}
+                                </span>
+                                @endif
+                            </div>
+                            @endif
+                        </div>
                         @endforeach
                     </div>
+
+                    <!-- もっと見るボタン -->
+                    <div class="flex justify-center mt-2 bg-white">
+                        <button class="show-more-btn text-sm text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors flex items-center">
+                            <span>もっと見る</span>
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    @endif
                 </div>
-                @endforeach
+                @else
+                <div class="border border-dashed border-gray-300 rounded-lg bg-gray-50 flex-grow flex flex-col items-center justify-center" style="width: calc(100% - 8px);">
+                    <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-sm text-gray-500">プロジェクトがありません</p>
+                </div>
+                @endif
             </div>
+            @endforeach
         </div>
-        @endforeach
     </div>
 
     <!-- 📌 案件編集モーダル -->
     <div x-show="openModal"
-        class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity"
+        class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity overflow-y-auto"
         x-transition.opacity
         @click.self="openModal = false"
-        x-cloak>
+        x-cloak
+        x-effect="if(openModal) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = ''; }">
+
+        <div class="min-h-screen py-6 flex flex-col justify-center sm:py-12">
+            <div class="bg-white rounded-3xl shadow-lg w-[700px] max-w-[700px] mx-auto p-10 transform transition-transform" @click.stop>
 
 
-        <div class="bg-white p-8 rounded-3xl shadow-lg w-[700px] 　max-h-[75vh] overflow-y-auto transform transition-transform my-6 mx-auto p-6" @click.stop>
-
-
-
-
-
-            <!-- タイトル & 閉じるボタン -->
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold" x-text="selectedProject ? '案件編集' : '案件追加'"></h2>
-                <button @click="openModal = false" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
-            </div>
-
-            <!-- タブ切り替え -->
-            <div class="flex mb-6 border-b">
-                <button @click="activeTab = 'edit'"
-                    class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
-                    :class="activeTab === 'edit' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'">
-                    案件編集
-                </button>
-                <button @click="activeTab = 'files'"
-                    class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
-                    :class="activeTab === 'files' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'"
-                    x-show="selectedProject">
-                    ファイル管理
-                </button>
-            </div>
-
-            <!-- 📌 案件編集タブ -->
-            <div x-show="activeTab === 'edit'">
-                <form :action="selectedProject ? `/projects/${selectedProject.id}` : '{{ route('projects.store') }}'" method="POST">
-                    @csrf
-                    <template x-if="selectedProject">
-                        <input type="hidden" name="_method" value="PUT">
-                    </template>
-
-                    <div class="grid grid-cols-1 gap-8">
-                        <!-- 案件情報 -->
-                        <div>
-                            <label class="block font-medium mb-2">案件名</label>
-                            <input type="text" name="name"
-                                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 shadow-md"
-                                x-model="selectedProject ? selectedProject.name : ''">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-8">
-                            <!-- フェーズ -->
-                            <div>
-                                <label class="block font-medium mb-2">フェーズ</label>
-                                <select name="phase_id"
-                                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 shadow-md">
-                                    @foreach ($phases as $phase)
-                                    <option value="{{ $phase->id }}"
-                                        x-bind:selected="selectedProject && selectedProject.phase_id == {{ $phase->id }}">
-                                        {{ $phase->name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- 顧客 -->
-                            <div>
-                                <label class="block font-medium mb-2">顧客</label>
-                                <select name="client_id"
-                                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 shadow-md">
-                                    @foreach ($clients as $client)
-                                    <option value="{{ $client->id }}"
-                                        x-bind:selected="selectedProject && selectedProject.client_id == {{ $client->id }}">
-                                        {{ $client->name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- 説明 -->
-                        <div>
-                            <label class="block font-medium mb-2">説明</label>
-                            <textarea name="description"
-                                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 h-32 shadow-md"
-                                x-model="selectedProject ? selectedProject.description : ''"></textarea>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-8">
-                            <!-- 売上 -->
-                            <div>
-                                <label class="block font-medium mb-2">売上</label>
-                                <input type="number" name="revenue"
-                                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 text-right shadow-md"
-                                    x-model="selectedProject ? selectedProject.revenue : ''"
-                                    @input="this.value = this.value.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
-                            </div>
-
-                            <!-- 粗利 -->
-                            <div>
-                                <label class="block font-medium mb-2">粗利</label>
-                                <input type="number" name="profit"
-                                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 text-right shadow-md"
-                                    x-model="selectedProject ? selectedProject.profit : ''"
-                                    @input="this.value = this.value.replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
-                            </div>
-                        </div>
-
-                        <!-- カテゴリ選択（タグ形式） -->
-                        <div>
-                            <label class="block font-medium mb-1">カテゴリ</label>
-                            <div class="flex flex-wrap gap-6">
-                                @foreach ($categories as $category)
-                                <label class="px-4 py-3 border rounded-lg cursor-pointer transition duration-200"
-                                    :class="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'"
-                                    @mouseover="this.classList.add('hover:bg-blue-400')"
-                                    @mouseout="this.classList.remove('hover:bg-blue-400')">
-                                    <input type="checkbox" name="category_id[]" value="{{ $category->id }}" class="hidden"
-                                        :checked="selectedProject?.categories?.some(c => c.id == {{ $category->id }})"
-                                        @change="toggleCategory({{ $category->id }})">
-                                    {{ $category->name }}
-                                </label>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ボタン配置 -->
-                    <div class="flex justify-between mt-8 pt-5 gap-8">
-
-                        <button @click="openModal = false" type="button"
-                            class="w-1/3 bg-gray-800 text-white px-6 py-3 rounded-full shadow-md transition-transform duration-300 ease-in-out hover:bg-gray-900 hover:-translate-y-1 hover:shadow-lg active:scale-95">
-                            閉じる
-                        </button>
-
-                        <!-- 更新 or 作成ボタン -->
-                        <button type="submit"
-                            class="w-1/3 bg-blue-500 text-white px-6 py-3 rounded-full shadow-md transition-transform duration-300 ease-in-out hover:bg-blue-600 hover:-translate-y-1 hover:shadow-lg active:scale-95"
-                            x-text="selectedProject ? '更新' : '作成'">
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- 📌 ファイル管理タブ -->
-            <div x-show="activeTab === 'files'" class="mt-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">ファイル管理</h3>
-                    <a :href="`/projects/${selectedProject.id}/files`"
-                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                        詳細管理へ
-                    </a>
+                <!-- タイトル & 閉じるボタン -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold" x-text="selectedProject ? '案件編集' : '案件追加'"></h2>
+                    <button @click="openModal = false" class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-700 hover:bg-red-100 hover:text-red-600 transition-colors focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
-                <!-- 最近のファイル一覧（シンプルな表示） -->
-                <div class="space-y-2">
-                    <template x-for="file in recentFiles" :key="file.id">
-                        <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                            <span x-text="file.file_name"></span>
-                            <span x-text="formatDate(file.created_at)"></span>
+                <!-- タブ切り替え -->
+                <div class="flex mb-6 border-b">
+                    <button @click="activeTab = 'edit'"
+                        class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
+                        :class="activeTab === 'edit' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'">
+                        案件詳細
+                    </button>
+                    <!-- <button @click="activeTab = 'files'"
+                        class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
+                        :class="activeTab === 'files' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'"
+                        x-show="selectedProject">
+                        ファイル管理
+                    </button> -->
+                </div>
+
+                <!-- 📌 案件編集タブ -->
+                <div x-show="activeTab === 'edit'">
+                    <form :action="selectedProject ? `/projects/${selectedProject.id}` : '{{ route('projects.store') }}'" method="POST">
+                        @csrf
+                        <template x-if="selectedProject">
+                            <input type="hidden" name="_method" value="PUT">
+                        </template>
+
+                        <div class="grid grid-cols-1 gap-6">
+                            <!-- 案件情報 -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">案件名</label>
+                                <input type="text" name="name"
+                                    class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
+                                    x-model="selectedProject ? selectedProject.name : ''">
+                            </div>
+
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <!-- フェーズ -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">フェーズ</label>
+                                    <select name="phase_id"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
+                                        @foreach ($phases as $phase)
+                                        <option value="{{ $phase->id }}"
+                                            x-bind:selected="selectedProject && selectedProject.phase_id == {{ $phase->id }}">
+                                            {{ $phase->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- 顧客 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">顧客</label>
+                                    <select name="client_id"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
+                                        @foreach ($clients as $client)
+                                        <option value="{{ $client->id }}"
+                                            x-bind:selected="selectedProject && selectedProject.client_id == {{ $client->id }}">
+                                            {{ $client->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 説明 -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">説明</label>
+                                <textarea name="description"
+                                    class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 h-32"
+                                    x-model="selectedProject ? selectedProject.description : ''"></textarea>
+                            </div>
+
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <!-- 売上 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">売上</label>
+                                    <input type="number" name="revenue" step="1" min="0"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 text-right"
+                                        :value="selectedProject ? Math.floor(selectedProject.revenue) : ''"
+                                        @input="selectedProject ? selectedProject.revenue = Math.floor($event.target.value) || 0 : ''">
+                                </div>
+
+                                <!-- 粗利 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">粗利</label>
+                                    <input type="number" name="profit" step="1" min="0"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 text-right"
+                                        :value="selectedProject ? Math.floor(selectedProject.profit) : ''"
+                                        @input="selectedProject ? selectedProject.profit = Math.floor($event.target.value) || 0 : ''">
+                                </div>
+                            </div>
+
+                            <!-- カテゴリ選択（タグ形式） -->
+                            <div>
+                                <label class="block font-medium mb-1">カテゴリ</label>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    @foreach ($categories as $category)
+                                    <label class="inline-flex items-center px-3.5 py-2 rounded-md border border-transparent transition-all duration-200 cursor-pointer select-none text-sm"
+                                        :class="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 
+                                            'bg-blue-100 text-blue-800 border-blue-200 font-medium shadow-sm' : 
+                                            'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100 hover:border-gray-200'">
+                                        <input type="checkbox" name="category_id[]" value="{{ $category->id }}" class="hidden"
+                                            :checked="selectedProject?.categories?.some(c => c.id == {{ $category->id }})"
+                                            @change="toggleCategory({{ $category->id }})">
+                                        <svg class="w-4 h-4 mr-1.5"
+                                            :class="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 'text-blue-600' : 'text-gray-400'"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path :stroke-width="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 2 : 1.5"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                        </svg>
+                                        {{ $category->name }}
+                                    </label>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
-                    </template>
+
+                        <!-- 最適化されたボタンレイアウト -->
+                        <div class="mt-8 pt-5 border-t border-gray-200">
+                            <!-- ファイル管理ナビゲーション - セカンダリーアクション -->
+                            <div x-show="selectedProject && selectedProject.id" class="mb-5">
+                                <a :href="`/projects/${selectedProject.id}/files`"
+                                    class="inline-flex items-center text-blue-600 hover:text-blue-800 py-2.5 px-4 rounded-lg hover:bg-blue-50 transition-colors">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <span>ファイル管理へ移動</span>
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                            </div>
+
+                            <!-- プライマリー操作 - 明確な視覚的階層 -->
+                            <div class="flex justify-end items-center gap-3">
+                                <button @click="openModal = false" type="button"
+                                    class="min-w-[120px] py-3 px-5 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400 shadow-sm transition-colors text-sm font-medium">
+                                    キャンセル
+                                </button>
+
+                                <button type="submit"
+                                    class="min-w-[120px] py-3 px-5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-600 shadow-sm transition-colors text-sm font-medium"
+                                    :class="{'opacity-50 cursor-not-allowed': isSubmitting}"
+                                    :disabled="isSubmitting"
+                                    x-text="selectedProject ? '変更を保存' : 'プロジェクト作成'">
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-
         </div>
+    </div>
+</div>
+@endsection
 
+<style>
+    /* 横スクロールバー */
+    .hide-scrollbar-x::-webkit-scrollbar {
+        height: 8px;
+    }
 
-        @endsection
+    .hide-scrollbar-x::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 8px;
+    }
 
-        <script>
-            document.addEventListener('alpine:init', () => {
-                Alpine.data('fileManager', (projectId) => ({
-                    projectFiles: [],
-                    fileCategory: 'その他',
+    .hide-scrollbar-x::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 8px;
+    }
 
-                    // ✅ ファイル一覧を取得
-                    fetchFiles() {
-                        if (!projectId) return;
-                        console.log("📂 ファイル一覧を取得開始...");
+    .hide-scrollbar-x::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+    }
 
-                        fetch(`/api/projects/${projectId}/files`)
-                            .then(res => {
-                                console.log("📩 APIレスポンス (fetchFiles):", res);
-                                if (!res.ok) throw new Error("⚠ ファイル一覧の取得に失敗しました");
-                                return res.json();
-                            })
-                            .then(data => {
-                                console.log("✅ 取得したファイル一覧:", data);
-                                this.projectFiles = data;
-                                console.log("🔄 更新後のファイルリスト:", this.projectFiles);
-                            })
-                            .catch(error => console.error("❌ エラー:", error));
-                    },
+    /* 縦スクロールバー */
+    .hide-scrollbar-y::-webkit-scrollbar {
+        width: 6px;
+    }
 
-                    // ✅ ファイルをアップロード
-                    uploadFile(event) {
-                        let formData = new FormData();
-                        let fileInput = event.target.files[0];
-                        let category = document.getElementById('category').value;
+    .hide-scrollbar-y::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 6px;
+    }
 
-                        if (!fileInput) {
-                            document.getElementById('uploadStatus').textContent = "ファイルが選択されていません";
-                            return;
-                        }
+    .hide-scrollbar-y::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 6px;
+    }
 
-                        formData.append('file', fileInput);
-                        formData.append('category', category);
+    .hide-scrollbar-y::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+    }
 
-                        // ✅ デバッグ出力
-                        console.log("送信データ:", formData.get('file'), formData.get('category'));
+    html,
+    body {
+        background-color: #f3f4f6;
+    }
+</style>
 
-                        fetch(`/api/projects/${projectId}/files`, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
-                                }
-                            })
-                            .then(res => {
-                                if (!res.ok) throw new Error("アップロードに失敗しました");
-                                return res.json();
-                            })
-                            .then(data => {
-                                console.log("アップロード成功:", data);
-                                this.fetchFiles();
-                                document.getElementById('uploadStatus').innerText = "✅ アップロード成功！";
-                                setTimeout(() => {
-                                    document.getElementById('uploadStatus').innerText = "";
-                                }, 3000);
-                                document.getElementById('uploadForm').reset();
-                            })
-                            .catch(error => {
-                                console.error("アップロードエラー:", error);
-                                document.getElementById('uploadStatus').textContent = "アップロード失敗...";
-                            })
-                    },
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // もっと見るボタンのイベント処理
+        const showMoreButtons = document.querySelectorAll('.show-more-btn');
 
-                    // ✅ ファイル削除処理
-                    deleteFile(fileId) {
-                        console.log(`🗑 削除リクエスト: ファイルID ${fileId}`);
+        showMoreButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const parentContainer = this.closest('.space-y-4');
+                const hiddenProjects = parentContainer.querySelector('.hidden-projects');
 
-                        fetch(`/api/projects/${projectId}/files/${fileId}`, {
-                                method: 'DELETE'
-                            })
-                            .then(res => {
-                                console.log("📩 APIレスポンス (deleteFile):", res);
-                                if (!res.ok) throw new Error("⚠ 削除に失敗しました");
-                                return res.json();
-                            })
-                            .then(() => {
-                                console.log(`✅ ファイルID ${fileId} が削除されました`);
-                                this.projectFiles = this.projectFiles.filter(f => f.id !== fileId);
-                                console.log("🔄 更新後のファイルリスト:", this.projectFiles);
-                            })
-                            .catch(error => console.error("❌ 削除エラー:", error));
-                    },
+                if (hiddenProjects.classList.contains('hidden')) {
+                    // 隠れたプロジェクトを表示
+                    hiddenProjects.classList.remove('hidden');
+                    this.querySelector('span').textContent = '折りたたむ';
+                    this.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>';
+                } else {
+                    // プロジェクトを再度隠す
+                    hiddenProjects.classList.add('hidden');
+                    this.querySelector('span').textContent = 'もっと見る';
+                    this.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>';
 
-                    // ✅ ファイルサイズのフォーマット
-                    formatFileSize(size) {
-                        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-                        let unitIndex = 0;
-                        while (size >= 1024 && unitIndex < units.length - 1) {
-                            size /= 1024;
-                            unitIndex++;
-                        }
-                        return `${size.toFixed(2)} ${units[unitIndex]}`;
-                    },
-
-                    // ✅ 日付のフォーマット
-                    formatDate(date) {
-                        return new Date(date).toLocaleDateString();
-                    }
-                }));
+                    // ボタンが見えるようにスクロール
+                    this.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
             });
-        </script>
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>

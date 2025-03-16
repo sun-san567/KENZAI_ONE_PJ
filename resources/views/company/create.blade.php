@@ -1,33 +1,49 @@
 @extends('layouts.app')
 
+@section('title', '新規会社登録')
+
 @section('content')
-<div class="container mx-auto p-6">
-    <h1 class="text-xl font-bold mb-4">新規会社登録</h1>
+<div class="ml-64 w-[calc(50%-64px)] mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-xl font-semibold text-gray-800 border-b border-gray-300 pb-4">新規会社登録</h1>
 
-    <form action="{{ route('companies.store') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-            <label class="block font-bold">会社名</label>
-            <input type="text" name="name" class="w-full border p-2" required>
-        </div>
+    <div class="bg-white shadow rounded-lg border border-gray-200 p-6 mt-6">
+        <form action="{{ route('companies.store') }}" method="POST">
+            @csrf
 
-        <div class="mb-3">
-            <label class="block font-bold">住所</label>
-            <input type="text" name="address" class="w-full border p-2">
-        </div>
+            <!-- 会社名 -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">会社名 <span class="text-red-500">*</span></label>
+                <input type="text" name="name" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="block font-bold">電話番号</label>
-            <input type="text" name="phone" class="w-full border p-2">
-        </div>
+            <!-- 住所 -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">住所</label>
+                <input type="text" name="address" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
 
-        <div class="mb-3">
-            <label class="block font-bold">メールアドレス</label>
-            <input type="email" name="email" class="w-full border p-2">
-        </div>
+            <!-- 電話番号 -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">電話番号</label>
+                <input type="text" name="phone" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
 
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">登録</button>
-        <a href="{{ route('companies.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded">戻る</a>
-    </form>
+            <!-- メールアドレス -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">メールアドレス</label>
+                <input type="email" name="email" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- ボタン -->
+            <div class="flex justify-end space-x-4">
+                <a href="{{ route('companies.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md transition">
+                    戻る
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition">
+                    登録
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

@@ -1,159 +1,368 @@
-<div class="col-span-8">
-    <div class="bg-white rounded-lg shadow p-6">
-        <!-- 上部コントロール部分 - 検索とアップロード -->
-        <div class="mb-6 flex flex-col md:flex-row justify-between gap-4">
-            <!-- 検索エリア -->
-            <div class="flex flex-col sm:flex-row gap-4 w-full md:w-2/3">
-                <div class="w-full sm:w-2/3">
-                    <div class="flex">
-                        <div class="relative flex-1">
-                            <input type="text"
-                                id="searchInput"
-                                placeholder="ファイル名で検索..."
-                                class="w-full px-4 py-2 pr-10 border border-r-0 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <span class="absolute right-3 top-2.5 text-gray-400">
-                                <i class="fas fa-search"></i>
-                            </span>
-                        </div>
-                        <button type="button" id="searchButton" onclick="window.fileSearchModule.performSearch()"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                            検索
-                        </button>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- 左側：ファイルアップロード (3カラム幅) -->
+    <div class="lg:col-span-3 order-2 lg:order-1">
+        @include('projects.files.partials.upload-area')
+
+        <!-- アップロード後のファイル一覧 -->
+        <div class="mt-6 bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800">アップロード済みファイル</h2>
+                <span class="text-gray-600 text-base ml-2">{{ $files->total() }} 件のファイル</span>
+            </div>
+
+            <!-- テーブルコンテナを最適化して余白のバランスを改善 -->
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="overflow-x-auto">
+                        <table class="w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-sm font-medium text-gray-600 uppercase tracking-normal w-5/12">
+                                        ファイル名
+                                    </th>
+                                    <th scope="col"
+                                        class="px-4 py-3 text-left text-sm font-medium text-gray-600 uppercase tracking-normal w-2/12">
+                                        種類
+                                    </th>
+                                    <th scope="col"
+                                        class="px-4 py-3 text-left text-sm font-medium text-gray-600 uppercase tracking-normal w-1/12">
+                                        サイズ
+                                    </th>
+                                    <th scope="col"
+                                        class="px-4 py-3 text-left text-sm font-medium text-gray-600 uppercase tracking-normal w-2/12">
+                                        アップロード日
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-sm font-medium text-gray-600 uppercase tracking-normal w-2/12">
+                                        操作
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="bg-white divide-y divide-gray-200" id="fileResults">
+                                @forelse ($files as $file)
+                                <tr>
+                                    <td class="px-6 py-3.5 whitespace-nowrap">
+                                        <div class="flex items-center gap-3">
+                                            <!-- ファイルタイプアイコン -->
+                                            <div class="flex-shrink-0 h-8 w-8 flex items-center justify-center">
+                                                @if(Str::contains($file->mime_type, 'pdf'))
+                                                <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                                                @elseif(Str::contains($file->mime_type, 'image'))
+                                                <i class="fas fa-file-image text-blue-500 text-xl"></i>
+                                                @else
+                                                <i class="fas fa-file text-gray-500 text-xl"></i>
+                                                @endif
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-base font-medium text-gray-900 truncate" title="{{ $file->file_name }}">
+                                                    {{ Str::limit($file->file_name, 60) }}
+                                                </div>
+                                                <!-- <div class="text-sm text-gray-500"> -->
+                                                <!-- {{ Str::title(Str::after($file->mime_type, '/')) }} -->
+                                                <!-- </div> -->
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-3.5 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+
+                                            @php
+                                            // MIMEタイプに基づくユーザーフレンドリーなファイルタイプ表示
+                                            $mimeType = strtolower($file->mime_type);
+                                            $extension = strtolower(pathinfo($file->file_name, PATHINFO_EXTENSION));
+
+                                            // ファイルタイプのマッピング（さらに詳細化）
+                                            $fileTypeMap = [
+                                            // Microsoft Office ファイル
+                                            'application/vnd.ms-excel' => ['name' => 'Excel', 'icon' => 'fa-file-excel'],
+                                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => ['name' => 'Excel', 'icon' => 'fa-file-excel'],
+                                            'application/vnd.ms-excel.sheet.macroEnabled' => ['name' => 'Excel', 'icon' => 'fa-file-excel'],
+                                            'application/msword' => ['name' => 'Word', 'icon' => 'fa-file-word'],
+                                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['name' => 'Word', 'icon' => 'fa-file-word'],
+                                            'application/vnd.ms-powerpoint' => ['name' => 'PowerPoint', 'icon' => 'fa-file-powerpoint'],
+                                            'application/vnd.openxmlformats-officedocument.presentationml.presentation' => ['name' => 'PowerPoint', 'icon' => 'fa-file-powerpoint'],
+
+                                            // PDF ファイル
+                                            'application/pdf' => ['name' => 'PDF', 'icon' => 'fa-file-pdf'],
+
+                                            // 画像ファイル
+                                            'image/jpeg' => ['name' => 'JPEG', 'icon' => 'fa-file-image'],
+                                            'image/png' => ['name' => 'PNG', 'icon' => 'fa-file-image'],
+                                            'image/gif' => ['name' => 'GIF', 'icon' => 'fa-file-image'],
+                                            'image/svg+xml' => ['name' => 'SVG', 'icon' => 'fa-file-image'],
+                                            'image/webp' => ['name' => 'WebP', 'icon' => 'fa-file-image'],
+
+                                            // 圧縮ファイル
+                                            'application/zip' => ['name' => 'ZIP', 'icon' => 'fa-file-archive'],
+                                            'application/x-rar-compressed' => ['name' => 'RAR', 'icon' => 'fa-file-archive'],
+                                            'application/x-7z-compressed' => ['name' => '7Z', 'icon' => 'fa-file-archive'],
+                                            'application/gzip' => ['name' => 'GZ', 'icon' => 'fa-file-archive'],
+
+                                            // テキストファイル
+                                            'text/plain' => ['name' => 'TEXT', 'icon' => 'fa-file-alt'],
+                                            'text/csv' => ['name' => 'CSV', 'icon' => 'fa-file-csv'],
+
+                                            // ソースコード関連
+                                            'text/html' => ['name' => 'HTML', 'icon' => 'fa-file-code'],
+                                            'text/css' => ['name' => 'CSS', 'icon' => 'fa-file-code'],
+                                            'application/javascript' => ['name' => 'JS', 'icon' => 'fa-file-code'],
+                                            'application/json' => ['name' => 'JSON', 'icon' => 'fa-file-code'],
+                                            'text/xml' => ['name' => 'XML', 'icon' => 'fa-file-code'],
+
+                                            // 動画/音声
+                                            'video/mp4' => ['name' => 'MP4', 'icon' => 'fa-file-video'],
+                                            'video/quicktime' => ['name' => 'MOV', 'icon' => 'fa-file-video'],
+                                            'audio/mpeg' => ['name' => 'MP3', 'icon' => 'fa-file-audio'],
+                                            'audio/wav' => ['name' => 'WAV', 'icon' => 'fa-file-audio']
+                                            ];
+
+                                            // 拡張子ベースのマッピング（MIMEタイプがない場合のバックアップ）
+                                            $extensionMap = [
+                                            // Microsoft Office
+                                            'xlsx' => ['name' => 'Excel', 'icon' => 'fa-file-excel'],
+                                            'xls' => ['name' => 'Excel', 'icon' => 'fa-file-excel'],
+                                            'xlsm' => ['name' => 'Excel', 'icon' => 'fa-file-excel'],
+                                            'doc' => ['name' => 'Word', 'icon' => 'fa-file-word'],
+                                            'docx' => ['name' => 'Word', 'icon' => 'fa-file-word'],
+                                            'ppt' => ['name' => 'PowerPoint', 'icon' => 'fa-file-powerpoint'],
+                                            'pptx' => ['name' => 'PowerPoint', 'icon' => 'fa-file-powerpoint'],
+
+                                            // PDF
+                                            'pdf' => ['name' => 'PDF', 'icon' => 'fa-file-pdf'],
+
+                                            // 画像
+                                            'jpg' => ['name' => 'JPEG', 'icon' => 'fa-file-image'],
+                                            'jpeg' => ['name' => 'JPEG', 'icon' => 'fa-file-image'],
+                                            'png' => ['name' => 'PNG', 'icon' => 'fa-file-image'],
+                                            'gif' => ['name' => 'GIF', 'icon' => 'fa-file-image'],
+                                            'svg' => ['name' => 'SVG', 'icon' => 'fa-file-image'],
+                                            'webp' => ['name' => 'WebP', 'icon' => 'fa-file-image'],
+
+                                            // 圧縮
+                                            'zip' => ['name' => 'ZIP', 'icon' => 'fa-file-archive'],
+                                            'rar' => ['name' => 'RAR', 'icon' => 'fa-file-archive'],
+                                            '7z' => ['name' => '7Z', 'icon' => 'fa-file-archive'],
+                                            'gz' => ['name' => 'GZ', 'icon' => 'fa-file-archive'],
+                                            'tar' => ['name' => 'TAR', 'icon' => 'fa-file-archive'],
+
+                                            // テキスト
+                                            'txt' => ['name' => 'TEXT', 'icon' => 'fa-file-alt'],
+                                            'csv' => ['name' => 'CSV', 'icon' => 'fa-file-csv'],
+
+                                            // ソースコード
+                                            'html' => ['name' => 'HTML', 'icon' => 'fa-file-code'],
+                                            'css' => ['name' => 'CSS', 'icon' => 'fa-file-code'],
+                                            'js' => ['name' => 'JS', 'icon' => 'fa-file-code'],
+                                            'json' => ['name' => 'JSON', 'icon' => 'fa-file-code'],
+                                            'xml' => ['name' => 'XML', 'icon' => 'fa-file-code'],
+
+                                            // 動画/音声
+                                            'mp4' => ['name' => 'MP4', 'icon' => 'fa-file-video'],
+                                            'mov' => ['name' => 'MOV', 'icon' => 'fa-file-video'],
+                                            'mp3' => ['name' => 'MP3', 'icon' => 'fa-file-audio'],
+                                            'wav' => ['name' => 'WAV', 'icon' => 'fa-file-audio']
+                                            ];
+
+                                            // 表示データの初期化
+                                            $fileType = ['name' => '', 'icon' => 'fa-file'];
+
+                                            // 表示名の決定（MIMEタイプ → 拡張子 → デフォルト）
+                                            if (isset($fileTypeMap[$mimeType])) {
+                                            $fileType = $fileTypeMap[$mimeType];
+                                            } elseif (isset($extensionMap[$extension])) {
+                                            $fileType = $extensionMap[$extension];
+                                            } else {
+                                            // 汎用的なカテゴリー判定
+                                            if (strpos($mimeType, 'excel') !== false || strpos($mimeType, 'spreadsheet') !== false) {
+                                            $fileType = ['name' => 'Excel', 'icon' => 'fa-file-excel'];
+                                            } elseif (strpos($mimeType, 'word') !== false || strpos($mimeType, 'document') !== false) {
+                                            $fileType = ['name' => 'Word', 'icon' => 'fa-file-word'];
+                                            } elseif (strpos($mimeType, 'powerpoint') !== false || strpos($mimeType, 'presentation') !== false) {
+                                            $fileType = ['name' => 'PowerPoint', 'icon' => 'fa-file-powerpoint'];
+                                            } elseif (strpos($mimeType, 'image/') === 0) {
+                                            $fileType = ['name' => '画像', 'icon' => 'fa-file-image'];
+                                            } elseif (strpos($mimeType, 'video/') === 0) {
+                                            $fileType = ['name' => '動画', 'icon' => 'fa-file-video'];
+                                            } elseif (strpos($mimeType, 'audio/') === 0) {
+                                            $fileType = ['name' => '音声', 'icon' => 'fa-file-audio'];
+                                            } elseif (strpos($mimeType, 'text/') === 0) {
+                                            $fileType = ['name' => 'テキスト', 'icon' => 'fa-file-alt'];
+                                            } else {
+                                            // フォールバック: MIMEタイプの「/」以降を取得して先頭大文字化
+                                            $fileType = [
+                                            'name' => Str::title(Str::after($mimeType, '/')),
+                                            'icon' => 'fa-file'
+                                            ];
+                                            }
+                                            }
+
+                                            // ファイルタイプに基づく色とスタイルの設定
+                                            $badgeStyle = '';
+                                            $bgColor = '';
+                                            $textColor = '';
+                                            $borderColor = '';
+
+                                            switch ($fileType['name']) {
+                                            case 'Excel':
+                                            $bgColor = 'bg-green-50';
+                                            $textColor = 'text-green-700';
+                                            $borderColor = 'border-green-200';
+                                            break;
+                                            case 'Word':
+                                            $bgColor = 'bg-blue-50';
+                                            $textColor = 'text-blue-700';
+                                            $borderColor = 'border-blue-200';
+                                            break;
+                                            case 'PowerPoint':
+                                            $bgColor = 'bg-orange-50';
+                                            $textColor = 'text-orange-700';
+                                            $borderColor = 'border-orange-200';
+                                            break;
+                                            case 'PDF':
+                                            $bgColor = 'bg-red-50';
+                                            $textColor = 'text-red-700';
+                                            $borderColor = 'border-red-200';
+                                            break;
+                                            case 'JPEG':
+                                            case 'PNG':
+                                            case 'GIF':
+                                            case 'SVG':
+                                            case 'WebP':
+                                            case '画像':
+                                            $bgColor = 'bg-indigo-50';
+                                            $textColor = 'text-indigo-700';
+                                            $borderColor = 'border-indigo-200';
+                                            break;
+                                            case 'ZIP':
+                                            case 'RAR':
+                                            case '7Z':
+                                            case 'GZ':
+                                            case 'TAR':
+                                            $bgColor = 'bg-purple-50';
+                                            $textColor = 'text-purple-700';
+                                            $borderColor = 'border-purple-200';
+                                            break;
+                                            case 'TEXT':
+                                            case 'CSV':
+                                            case 'テキスト':
+                                            $bgColor = 'bg-gray-50';
+                                            $textColor = 'text-gray-700';
+                                            $borderColor = 'border-gray-200';
+                                            break;
+                                            case 'HTML':
+                                            case 'CSS':
+                                            case 'JS':
+                                            case 'JSON':
+                                            case 'XML':
+                                            $bgColor = 'bg-cyan-50';
+                                            $textColor = 'text-cyan-700';
+                                            $borderColor = 'border-cyan-200';
+                                            break;
+                                            case 'MP4':
+                                            case 'MOV':
+                                            case '動画':
+                                            $bgColor = 'bg-yellow-50';
+                                            $textColor = 'text-yellow-700';
+                                            $borderColor = 'border-yellow-200';
+                                            break;
+                                            case 'MP3':
+                                            case 'WAV':
+                                            case '音声':
+                                            $bgColor = 'bg-pink-50';
+                                            $textColor = 'text-pink-700';
+                                            $borderColor = 'border-pink-200';
+                                            break;
+                                            default:
+                                            $bgColor = 'bg-gray-50';
+                                            $textColor = 'text-gray-700';
+                                            $borderColor = 'border-gray-200';
+                                            }
+                                            @endphp
+
+                                            <!-- ファイル種別ラベル -->
+                                            <span class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium border {{ $bgColor }} {{ $textColor }} {{ $borderColor }}">
+                                                <i class="fas {{ $fileType['icon'] }} mr-1.5"></i>
+                                                {{ $fileType['name'] }}
+                                            </span>
+
+                                        </div>
+                                    </td>
+
+                                    <!-- ファイルサイズ -->
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            @if($file->size >= 1048576)
+                                            {{ number_format($file->size / 1048576, 2) }} MB
+                                            @else
+                                            {{ number_format($file->size / 1024, 2) }} KB
+                                            @endif
+                                        </div>
+                                    </td>
+
+                                    <!-- アップロード日時 -->
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ $file->created_at->format('m/d H:i') }}
+                                        </div>
+                                    </td>
+                                    <!-- 操作ボタン -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-center space-x-4">
+                                            <!-- ダウンロードボタン -->
+                                            <a href="{{ route('projects.files.download', [$project->id, $file->id]) }}"
+                                                class="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md shadow-md hover:shadow-lg transition-all duration-200 leading-none">
+                                                <span class="inline-flex items-center gap-2">
+                                                    <!-- SVGアイコン（ダウンロード） -->
+                                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M12 4v12m0 0l-4-4m4 4l4-4m-8 4h8"></path>
+                                                    </svg>
+                                                    <span class="hidden sm:inline">ダウンロード</span>
+                                                </span>
+                                            </a>
+
+                                            <!-- 削除ボタン -->
+                                            <form action="{{ route('projects.files.destroy', [$project->id, $file->id]) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('{{ $file->file_name }} を削除してもよろしいですか？\nこの操作は取り消せません。');"
+                                                class="inline-block">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-md shadow-md hover:shadow-lg transition-all duration-200 leading-none">
+                                                    <span class="inline-flex items-center gap-2">
+                                                        <!-- SVGアイコン（削除） -->
+                                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                        <span class="hidden sm:inline">削除</span>
+                                                    </span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                        ファイルがまだアップロードされていません
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ページネーション -->
+                    <div class="px-6 py-3 border-t">
+                        {{ $files->links() }}
                     </div>
                 </div>
-
-                <div class="w-full sm:w-1/3">
-                    <select id="typeFilter" onchange="window.fileSearchModule.performSearch()" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">すべてのタイプ</option>
-                        <option value="document">文書</option>
-                        <option value="image">画像</option>
-                        <option value="video">動画</option>
-                        <option value="audio">音声</option>
-                        <option value="archive">圧縮ファイル</option>
-                    </select>
-                </div>
             </div>
-
-            <!-- アップロードエリアを復元（既存のファイルを利用） -->
-            <div class="w-full md:w-1/3 lg:w-1/4 xl:w-1/5">
-                @include('projects.files.partials.upload-area')
-            </div>
-        </div>
-
-        <!-- デバッグ情報表示エリア -->
-        <!-- <div id="debugArea" class="mb-4 p-3 bg-gray-100 rounded-lg border border-gray-300 overflow-auto max-h-48 text-xs font-mono">
-            <div class="flex justify-between mb-1">
-                <h3 class="font-bold">デバッグ情報</h3>
-                <button onclick="document.getElementById('debugContent').innerHTML = ''" class="text-xs text-red-500 hover:text-red-700">クリア</button>
-            </div>
-            <div id="debugContent"></div>
-        </div> -->
-
-        <!-- ファイル一覧テーブル -->
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="w-8 px-4 py-3">
-                            <input type="checkbox" id="selectAll"
-                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            ファイル名
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            サイズ
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            アップロード日時
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            操作
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="fileListBody" class="bg-white divide-y divide-gray-200">
-                    @foreach($files as $file)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <!-- ファイルタイプアイコン -->
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    @if(Str::contains($file->mime_type, 'pdf'))
-                                    <i class="fas fa-file-pdf text-red-500 text-2xl"></i>
-                                    @elseif(Str::contains($file->mime_type, 'image'))
-                                    <i class="fas fa-file-image text-blue-500 text-2xl"></i>
-                                    @else
-                                    <i class="fas fa-file text-gray-500 text-2xl"></i>
-                                    @endif
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        {{ $file->file_name }}
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        {{ Str::title(Str::after($file->mime_type, '/')) }}
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">
-                                {{ number_format($file->size / 1024, 2) }} KB
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">
-                                {{ $file->created_at->format('Y/m/d H:i') }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex space-x-3">
-                                <!-- プレビューボタン（既存機能を保持） -->
-                                @if(isPreviewable($file->mime_type))
-                                <button onclick="openPreview({{ $project->id }}, {{ $file->id }}, '{{ $file->file_name }}')"
-                                    class="text-gray-600 hover:text-gray-900 flex items-center">
-                                    <i class="fas fa-eye mr-1"></i>
-                                    <span>プレビュー</span>
-                                </button>
-                                @endif
-
-                                <!-- ダウンロードボタン -->
-                                <a href="{{ route('projects.files.download', [$project->id, $file->id]) }}"
-                                    class="text-blue-600 hover:text-blue-900 flex items-center">
-                                    <i class="fas fa-download mr-1"></i>
-                                    <span>ダウンロード</span>
-                                </a>
-
-                                <!-- 削除ボタン -->
-                                <form action="{{ route('projects.files.destroy', [$project->id, $file->id]) }}"
-                                    method="POST"
-                                    onsubmit="return confirm('{{ $file->file_name }} を削除してもよろしいですか？\nこの操作は取り消せません。');"
-                                    class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 flex items-center">
-                                        <i class="fas fa-trash-alt mr-1"></i>
-                                        <span>削除</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 検索結果がない場合のメッセージ -->
-        <div id="noResultsMessage" class="hidden py-8 text-center text-gray-500">
-            <i class="fas fa-search text-3xl mb-2"></i>
-            <p>検索条件に一致するファイルが見つかりませんでした。</p>
-        </div>
-
-        <!-- ページネーション -->
-        <div class="mt-4" id="pagination">
-            {{ $files->links() }}
         </div>
     </div>
 </div>

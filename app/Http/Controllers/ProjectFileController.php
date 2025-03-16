@@ -135,10 +135,14 @@ class ProjectFileController extends Controller
 
     public function upload(Request $request, Project $project)
     {
-        // 複数ファイルのバリデーション
         $request->validate([
-            'files' => 'required|array',
-            'files.*' => 'required|file|max:102400', // 100MB制限
+            'files' => 'required',
+            'files.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif|max:10240',
+        ], [
+            'files.required' => 'ファイルを選択してください。',
+            'files.*.file' => 'アップロードされたファイルが無効です。',
+            'files.*.mimes' => 'アップロードできるファイル形式は PDF, Word, Excel, PowerPoint, 画像ファイルのみです。',
+            'files.*.max' => 'ファイルサイズは10MB以下にしてください。',
         ]);
 
         $uploadedFiles = [];

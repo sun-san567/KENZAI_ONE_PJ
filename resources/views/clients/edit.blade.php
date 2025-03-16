@@ -4,7 +4,7 @@
 <div class="ml-64 w-[calc(50%-64px)] mx-auto py-6 px-4 sm:px-6 lg:px-8">
     <!-- ヘッダー -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-xl font-bold text-gray-800">クライアント登録</h1>
+        <h1 class="text-xl font-bold text-gray-800">クライアント編集</h1>
     </div>
 
     <!-- エラーメッセージ -->
@@ -27,17 +27,19 @@
     </div>
     @endif
 
-    <!-- クライアント登録フォーム -->
+    <!-- クライアント編集フォーム -->
     <div class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 p-6">
-        <form action="{{ route('clients.store') }}" method="POST">
+        <form action="{{ route('clients.update', $client->id) }}" method="POST">
             @csrf
+            @method('PUT')
 
             <input type="hidden" name="company_id" value="{{ auth()->user()->company_id }}">
 
             <!-- クライアント名 -->
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700">クライアント名 <span class="text-red-500">*</span></label>
-                <input type="text" name="name" id="name" class="w-full border-gray-300 rounded-md p-2 shadow-sm" value="{{ old('name') }}" required>
+                <input type="text" name="name" id="name" class="w-full border-gray-300 rounded-md p-2 shadow-sm"
+                    value="{{ old('name', $client->name) }}" required>
             </div>
 
             <!-- 部門選択 -->
@@ -46,7 +48,8 @@
                 <select name="department_id" id="department_id" class="w-full border-gray-300 rounded-md p-2 shadow-sm">
                     <option value="">なし</option>
                     @foreach ($departments as $department)
-                    <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
+                    <option value="{{ $department->id }}"
+                        {{ old('department_id', $client->department_id) == $department->id ? 'selected' : '' }}>
                         {{ $department->name }}
                     </option>
                     @endforeach
@@ -59,7 +62,8 @@
                 <select name="user_id" id="user_id" class="w-full border-gray-300 rounded-md p-2 shadow-sm">
                     <option value="">担当者を選択</option>
                     @foreach ($users as $user)
-                    <option value="{{ $user->id }}" data-department="{{ $user->department_id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                    <option value="{{ $user->id }}" data-department="{{ $user->department_id }}"
+                        {{ old('user_id', $client->user_id) == $user->id ? 'selected' : '' }}>
                         {{ $user->name }}
                     </option>
                     @endforeach
@@ -72,7 +76,7 @@
                     キャンセル
                 </a>
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-700">
-                    登録
+                    更新
                 </button>
             </div>
         </form>
