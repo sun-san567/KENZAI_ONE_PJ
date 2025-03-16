@@ -36,6 +36,21 @@
         +
     </button>
 
+    <!-- 画面上部に表示するステータス -->
+    <div class="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-medium text-gray-800">
+                @if($isAdmin)
+                全社プロジェクト管理
+                @else
+                {{ auth()->user()->department->name }} のプロジェクト管理
+                @endif
+            </h2>
+
+            <!-- 既存のコンテンツ -->
+        </div>
+    </div>
+
     <!-- 📌 フェーズごとの案件一覧 -->
     <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 px-4 hide-scrollbar-x bg-gray-100">
         <div class="flex space-x-6 min-w-max px-4 pb-4">

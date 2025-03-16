@@ -16,9 +16,11 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-        // 現在のログインユーザーの会社ID
-        $companyId = auth()->user()->company_id;
-        $userId = auth()->id();
+        // 現在のログインユーザーの情報
+        $user = auth()->user();
+        $companyId = $user->company_id;
+        $userDepartmentId = $user->department_id;
+        $isAdmin = $user->role === 'admin';
 
         // 基本クエリ - 自社のクライアントに紐づくプロジェクトのみ
         $query = Project::with(['client', 'phase'])
@@ -50,9 +52,29 @@ class ProjectController extends Controller
         // カテゴリを自社のものだけに制限
         $categories = Category::where('company_id', $companyId)->get();
 
-        // フェーズも自社の部門に限定
-        $departmentIds = Department::where('company_id', $companyId)->pluck('id');
-        $phases = Phase::whereIn('department_id', $departmentIds)->get();
+        // フェーズの制限：管理者なら全社、一般ユーザーなら自部門のみ
+        if ($isAdmin) {
+            // 管理者: 会社の全フェーズを表示
+            $departmentIds = Department::where('company_id', $companyId)->pluck('id');
+            $phases = Phase::whereIn('department_id', $departmentIds)
+                ->with(['projects' => function ($query) use ($companyId) {
+                    $query->whereHas('client', function ($q) use ($companyId) {
+                        $q->where('company_id', $companyId);
+                    });
+                }])
+                ->orderBy('order')
+                ->get();
+        } else {
+            // 一般ユーザー: 自部門のフェーズのみ表示
+            $phases = Phase::where('department_id', $userDepartmentId)
+                ->with(['projects' => function ($query) use ($companyId) {
+                    $query->whereHas('client', function ($q) use ($companyId) {
+                        $q->where('company_id', $companyId);
+                    });
+                }])
+                ->orderBy('order')
+                ->get();
+        }
 
         // クライアントも自社のみ
         $clients = Client::where('company_id', $companyId)->get();
@@ -64,7 +86,7 @@ class ProjectController extends Controller
             }]);
         }
 
-        return view('projects.index', compact('projects', 'categories', 'phases', 'clients'));
+        return view('projects.index', compact('projects', 'categories', 'phases', 'clients', 'isAdmin'));
     }
 
     /**
