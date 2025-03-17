@@ -28,15 +28,21 @@ class DepartmentController extends Controller
 
     public function create()
     {
-        $companies = Company::all();
-        return view('departments.create', compact('companies'));
+        // ログインユーザーの会社のみを取得
+        $companyId = auth()->user()->company_id;
+        $company = Company::find($companyId);
+
+        return view('departments.create', compact('company'));
     }
 
     public function store(Request $request)
     {
+        // ログインユーザーの会社ID
+        $companyId = auth()->user()->company_id;
+
         $request->validate([
-            'company_id' => 'required|exists:companies,id',
-            'name' => 'required|string|max:255|unique:departments,name',
+            'company_id' => "required|in:$companyId", // 自社IDのみ許可
+            'name' => 'required|string|max:255|unique:departments,name,NULL,id,company_id,' . $companyId, // 同じ会社内での重複チェック
         ]);
 
         Department::create($request->all());
