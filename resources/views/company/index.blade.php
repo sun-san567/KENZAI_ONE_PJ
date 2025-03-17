@@ -34,35 +34,35 @@
         <h1 class="text-xl font-semibold text-gray-800 border-b border-gray-300 pb-4">会社情報管理</h1>
 
         <!-- 会社情報テーブル -->
-        <div class="overflow-x-auto rounded-lg shadow">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="w-full overflow-x-auto rounded-lg shadow">
+            <table class="w-full divide-y divide-gray-200">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">会社名</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">住所</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">電話番号</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">メール</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase">操作</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase w-1/3">住所</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase w-1/6">電話番号</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase w-1/4">メール</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase w-24">操作</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->name }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-800">
-                            <div class="truncate max-w-[200px]" title="{{ $company->address }}">{{ $company->address }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->phone }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-800">
-                            <div class="truncate max-w-[180px]" title="{{ $company->email }}">{{ $company->email }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-right whitespace-nowrap">
-                            <a href="{{ route('company.edit', $company->id) }}"
-                                class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                                </svg>
-                            </a>
-                        </td>
+                    <tr class="hover:bg-gray-50 transition"></tr>
+                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->name }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">
+                        <div class="truncate" title="{{ $company->address }}">{{ $company->address }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->phone }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">
+                        <div class="truncate" title="{{ $company->email }}">{{ $company->email }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                        <a href="{{ route('company.edit', $company->id) }}"
+                            class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                        </a>
+                    </td>
                     </tr>
                 </tbody>
             </table>
