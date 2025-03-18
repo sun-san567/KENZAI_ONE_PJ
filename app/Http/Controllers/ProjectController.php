@@ -106,31 +106,50 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        // ログインユーザー情報の取得
+        $user = auth()->user();
+        $companyId = $user->company_id;
+        $departmentId = $user->department_id;
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phase_id' => 'required|exists:phases,id',
             'client_id' => 'required|exists:clients,id',
+            'description' => 'nullable|string',
             'category_id' => 'nullable|array',
             'category_id.*' => 'exists:categories,id',
             'revenue' => 'nullable|numeric|min:0',
             'profit' => 'nullable|numeric|min:0',
         ]);
 
-        $project = Project::create([
-            'name' => $validated['name'],
-            'phase_id' => $validated['phase_id'],
-            'client_id' => $validated['client_id'],
-            'revenue' => $validated['revenue'] ?? 0,
-            'profit' => $validated['profit'] ?? 0,
-        ]);
+        try {
+            // プロジェクト作成 - 会社IDと部門IDを追加
+            $project = Project::create([
+                'name' => $validated['name'],
+                'phase_id' => $validated['phase_id'],
+                'client_id' => $validated['client_id'],
+                'description' => $validated['description'] ?? null,
+                'revenue' => $validated['revenue'] ?? 0,
+                'profit' => $validated['profit'] ?? 0,
+                'company_id' => $companyId,
+                'department_id' => $departmentId,
+                'user_id' => $user->id,  // 作成者ID
+            ]);
 
-        if (!empty($validated['category_id'])) {
-            $project->categories()->sync($validated['category_id']);
-        } else {
-            $project->categories()->detach();
+            // カテゴリの関連付け
+            if (!empty($validated['category_id'])) {
+                $project->categories()->sync($validated['category_id']);
+            }
+
+            return redirect()->route('projects.index')
+                ->with('success', '案件が作成されました。');
+        } catch (\Exception $e) {
+            // エラーログ記録
+            \Log::error('プロジェクト作成エラー: ' . $e->getMessage());
+
+            return back()->withInput()
+                ->with('error', '案件の作成に失敗しました。システム管理者にお問い合わせください。');
         }
-
-        return redirect()->route('projects.index')->with('success', '案件が作成されました。');
     }
 
     /**

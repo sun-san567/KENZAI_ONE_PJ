@@ -211,8 +211,13 @@
 
                 <!-- 📌 案件編集タブ -->
                 <div x-show="activeTab === 'edit'">
-                    <form :action="selectedProject ? `/projects/${selectedProject.id}` : '{{ route('projects.store') }}'" method="POST">
+                    <form x-init="storeUrl = '{{ route('projects.store') }}'"
+                        :action="selectedProject ? `/projects/${selectedProject.id}` : storeUrl"
+                        method="POST">
+
                         @csrf
+
+                        <!-- 編集時に PUT メソッドを適用 -->
                         <template x-if="selectedProject">
                             <input type="hidden" name="_method" value="PUT">
                         </template>
@@ -265,6 +270,32 @@
                                     x-model="selectedProject ? selectedProject.description : ''"></textarea>
                             </div>
 
+                            <!-- 日付関連フィールド追加 -->
+                            <div class="grid grid-cols-3 gap-6">
+                                <!-- 見積期限 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">見積期限</label>
+                                    <input type="date" name="estimate_deadline"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
+                                        :value="selectedProject && selectedProject.estimate_deadline ? selectedProject.estimate_deadline : ''">
+                                </div>
+
+                                <!-- 着工日 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">着工日</label>
+                                    <input type="date" name="start_date"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
+                                        :value="selectedProject && selectedProject.start_date ? selectedProject.start_date : ''">
+                                </div>
+
+                                <!-- 竣工日 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">竣工日</label>
+                                    <input type="date" name="end_date"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
+                                        :value="selectedProject && selectedProject.end_date ? selectedProject.end_date : ''">
+                                </div>
+                            </div>
 
                             <div class="grid grid-cols-2 gap-6">
                                 <!-- 売上 -->

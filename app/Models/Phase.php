@@ -11,9 +11,6 @@ class Phase extends Model
 
     protected $fillable = ['name', 'description', 'order', 'department_id'];
 
-    /**
-     * このフェーズに関連するプロジェクトを取得
-     */
     public function projects()
     {
         return $this->hasMany(Project::class);

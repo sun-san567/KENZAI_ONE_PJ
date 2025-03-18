@@ -81,6 +81,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/projects/{project}/files/{file}/content', [ProjectFileController::class, 'previewContent'])
         ->name('projects.files.preview-content');
 
+    // プロジェクト一覧表示
+    Route::get('/projects', [App\Http\Controllers\ProjectController::class, 'index'])
+        ->name('projects.index');
+
     Route::get('/home', function () {
         return view('home');
     })->name('home');
