@@ -102,28 +102,36 @@ class ProjectController extends Controller
     }
 
     /**
-     * 案件保存処理
+     * 案件保存処理 (デバッグ付き)
      */
     public function store(Request $request)
     {
-        // ログインユーザー情報の取得
-        $user = auth()->user();
-        $companyId = $user->company_id;
-        $departmentId = $user->department_id;
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phase_id' => 'required|exists:phases,id',
-            'client_id' => 'required|exists:clients,id',
-            'description' => 'nullable|string',
-            'category_id' => 'nullable|array',
-            'category_id.*' => 'exists:categories,id',
-            'revenue' => 'nullable|numeric|min:0',
-            'profit' => 'nullable|numeric|min:0',
-        ]);
-
         try {
-            // プロジェクト作成 - 会社IDと部門IDを追加
+            // 1️⃣ ユーザー情報を確認
+            $user = auth()->user();
+            \Log::info("ユーザー情報: ", [
+                'user_id' => $user->id,
+                'company_id' => $user->company_id,
+                'department_id' => $user->department_id
+            ]);
+
+            // 2️⃣ リクエストデータを確認
+            \Log::info("受信データ: ", $request->all());
+            dd($request->all()); // 確認後、削除する
+
+            // 3️⃣ バリデーション
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'phase_id' => 'required|exists:phases,id',
+                'client_id' => 'required|exists:clients,id',
+                'description' => 'nullable|string',
+                'category_id' => 'nullable|array',
+                'category_id.*' => 'exists:categories,id',
+                'revenue' => 'nullable|numeric|min:0',
+                'profit' => 'nullable|numeric|min:0',
+            ]);
+
+            // 4️⃣ プロジェクト作成
             $project = Project::create([
                 'name' => $validated['name'],
                 'phase_id' => $validated['phase_id'],
@@ -131,26 +139,29 @@ class ProjectController extends Controller
                 'description' => $validated['description'] ?? null,
                 'revenue' => $validated['revenue'] ?? 0,
                 'profit' => $validated['profit'] ?? 0,
-                'company_id' => $companyId,
-                'department_id' => $departmentId,
+                'company_id' => $user->company_id,
+                'department_id' => $user->department_id,
                 'user_id' => $user->id,  // 作成者ID
             ]);
 
-            // カテゴリの関連付け
+            \Log::info("プロジェクト作成成功: ", ['project_id' => $project->id]);
+            dd(Project::all()); // 確認後、削除する
+
+            // 5️⃣ カテゴリの関連付け
             if (!empty($validated['category_id'])) {
                 $project->categories()->sync($validated['category_id']);
             }
 
-            return redirect()->route('projects.index')
-                ->with('success', '案件が作成されました。');
+            // 6️⃣ リダイレクト処理
+            return redirect()->route('projects.index')->with('success', '案件が作成されました。');
         } catch (\Exception $e) {
             // エラーログ記録
-            \Log::error('プロジェクト作成エラー: ' . $e->getMessage());
+            \Log::error("プロジェクト作成エラー: " . $e->getMessage());
 
-            return back()->withInput()
-                ->with('error', '案件の作成に失敗しました。システム管理者にお問い合わせください。');
+            return back()->withInput()->with('error', '案件の作成に失敗しました。');
         }
     }
+
 
     /**
      * 案件編集ページ

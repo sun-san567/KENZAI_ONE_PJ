@@ -211,9 +211,27 @@
 
                 <!-- 📌 案件編集タブ -->
                 <div x-show="activeTab === 'edit'">
-                    <form x-init="storeUrl = '{{ route('projects.store') }}'"
-                        :action="selectedProject ? `/projects/${selectedProject.id}` : storeUrl"
-                        method="POST">
+                    <script>
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.store('debug', {
+                                logForm(event) {
+                                    console.log('Form submission:', {
+                                        action: event.target.action,
+                                        method: event.target.method,
+                                        hasMethodField: event.target.querySelector('input[name="_method"]') !== null,
+                                        methodValue: event.target.querySelector('input[name="_method"]')?.value
+                                    });
+                                }
+                            });
+                        });
+                    </script>
+
+                    <form method="POST"
+                        :action="selectedProject && selectedProject.id 
+                            ? '/projects/' + selectedProject.id 
+                            : '{{ route('projects.store') }}'"
+                        @submit="$store.debug.logForm($event)">
+
 
                         @csrf
 
@@ -276,26 +294,27 @@
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">見積期限</label>
                                     <input type="date" name="estimate_deadline"
-                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
-                                        :value="selectedProject && selectedProject.estimate_deadline ? selectedProject.estimate_deadline : ''">
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
+                                        :value="selectedProject?.estimate_deadline ?? ''">
                                 </div>
 
                                 <!-- 着工日 -->
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">着工日</label>
                                     <input type="date" name="start_date"
-                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
-                                        :value="selectedProject && selectedProject.start_date ? selectedProject.start_date : ''">
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
+                                        :value="selectedProject?.start_date ?? ''">
                                 </div>
 
                                 <!-- 竣工日 -->
                                 <div class="mb-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">竣工日</label>
                                     <input type="date" name="end_date"
-                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
-                                        :value="selectedProject && selectedProject.end_date ? selectedProject.end_date : ''">
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
+                                        :value="selectedProject?.end_date ?? ''">
                                 </div>
                             </div>
+
 
                             <div class="grid grid-cols-2 gap-6">
                                 <!-- 売上 -->
@@ -367,11 +386,31 @@
                                     キャンセル
                                 </button>
 
-                                <button type="submit"
+                                <!-- submit ボタンを通常のボタンに変更し、JavaScript で制御 -->
+                                <button type="button"
                                     class="min-w-[120px] py-3 px-5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-600 shadow-sm transition-colors text-sm font-medium"
                                     :class="{'opacity-50 cursor-not-allowed': isSubmitting}"
                                     :disabled="isSubmitting"
-                                    x-text="selectedProject ? '変更を保存' : 'プロジェクト作成'">
+                                    x-text="selectedProject && selectedProject.id ? '変更を保存' : 'プロジェクト作成'"
+                                    @click="(() => {
+                                        // フォーム検証
+                                        const form = $el.closest('form');
+                                        
+                                        // 明示的にアクションを設定
+                                        if (selectedProject && selectedProject.id) {
+                                            form.action = '{{ url('/projects') }}/' + selectedProject.id;
+                                            const methodInput = form.querySelector('input[name=_method]');
+                                            if (methodInput) methodInput.value = 'PUT';
+                                        } else {
+                                            form.action = '{{ route('projects.store') }}';
+                                        }
+                                        
+                                        console.log('Submitting to: ' + form.action + ' with method: ' + 
+                                                    (form.querySelector('input[name=_method]')?.value || 'POST'));
+                                                
+                                        // フォーム送信
+                                        form.submit();
+                                    })()">
                                 </button>
                             </div>
                         </div>

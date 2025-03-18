@@ -85,6 +85,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/projects', [App\Http\Controllers\ProjectController::class, 'index'])
         ->name('projects.index');
 
+    // プロジェクト保存
+    Route::post('/projects', [App\Http\Controllers\ProjectController::class, 'store'])
+        ->name('projects.store');
+
+    // プロジェクト更新
+    Route::put('/projects/{project}', [App\Http\Controllers\ProjectController::class, 'update'])
+        ->name('projects.update');
+
     Route::get('/home', function () {
         return view('home');
     })->name('home');
