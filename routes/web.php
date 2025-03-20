@@ -81,6 +81,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/projects/{project}/files/{file}/content', [ProjectFileController::class, 'previewContent'])
         ->name('projects.files.preview-content');
 
+    // プロジェクト一覧表示
+    Route::get('/projects', [App\Http\Controllers\ProjectController::class, 'index'])
+        ->name('projects.index');
+
+    // プロジェクト保存
+    Route::post('/projects', [App\Http\Controllers\ProjectController::class, 'store'])
+        ->name('projects.store');
+
+    // プロジェクト更新
+    Route::put('/projects/{project}', [App\Http\Controllers\ProjectController::class, 'update'])
+        ->name('projects.update');
+
     Route::get('/home', function () {
         return view('home');
     })->name('home');

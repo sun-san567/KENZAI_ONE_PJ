@@ -36,6 +36,17 @@
         +
     </button>
 
+    <!-- 画面上部に表示するステータス -->
+    <!-- <div class="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-medium text-gray-800">
+                プロジェクト管理
+            </h2>
+
+             既存のコンテンツ -->
+    <!-- </div>
+    </div> -->
+
     <!-- 📌 フェーズごとの案件一覧 -->
     <div class="w-full max-w-[1920px] mx-auto overflow-x-auto pb-6 px-4 hide-scrollbar-x bg-gray-100">
         <div class="flex space-x-6 min-w-max px-4 pb-4">
@@ -200,9 +211,32 @@
 
                 <!-- 📌 案件編集タブ -->
                 <div x-show="activeTab === 'edit'">
-                    <form :action="selectedProject ? `/projects/${selectedProject.id}` : '{{ route('projects.store') }}'" method="POST">
+                    <script>
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.store('debug', {
+                                logForm(event) {
+                                    console.log('Form submission:', {
+                                        action: event.target.action,
+                                        method: event.target.method,
+                                        hasMethodField: event.target.querySelector('input[name="_method"]') !== null,
+                                        methodValue: event.target.querySelector('input[name="_method"]')?.value
+                                    });
+                                }
+                            });
+                        });
+                    </script>
+
+                    <form method="POST"
+                        x-data="{ storeUrl: '{{ route('projects.store') }}' }"
+                        :action="selectedProject?.id 
+            ? '{{ route('projects.update', '') }}' + selectedProject.id 
+            : storeUrl"
+                        @submit="$store.debug.logForm($event)">
+
                         @csrf
-                        <template x-if="selectedProject">
+
+                        <!-- 編集時に PUT メソッドを適用 -->
+                        <template x-if="selectedProject?.id">
                             <input type="hidden" name="_method" value="PUT">
                         </template>
 
@@ -254,6 +288,34 @@
                                     x-model="selectedProject ? selectedProject.description : ''"></textarea>
                             </div>
 
+                            <!-- 日付関連フィールド追加 -->
+                            <div class="grid grid-cols-3 gap-6">
+                                <!-- 見積期限 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">見積期限</label>
+                                    <input type="date" name="estimate_deadline"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
+                                        :value="selectedProject?.estimate_deadline ? new Date(selectedProject.estimate_deadline).toISOString().split('T')[0] : ''">
+                                </div>
+
+                                <!-- 着工日 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">着工日</label>
+                                    <input type="date" name="start_date"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
+                                        :value="selectedProject?.start_date ? new Date(selectedProject.start_date).toISOString().split('T')[0] : ''">
+                                </div>
+
+                                <!-- 竣工日 -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">竣工日</label>
+                                    <input type="date" name="end_date"
+                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
+                                        :value="selectedProject?.end_date ? new Date(selectedProject.end_date).toISOString().split('T')[0] : ''">
+                                </div>
+                            </div>
+
+
 
                             <div class="grid grid-cols-2 gap-6">
                                 <!-- 売上 -->
@@ -278,19 +340,26 @@
                             <!-- カテゴリ選択（タグ形式） -->
                             <div>
                                 <label class="block font-medium mb-1">カテゴリ</label>
-                                <div class="flex flex-wrap gap-2 mt-2">
+                                <div class="flex flex-wrap gap-2 mt-2" x-data="{ selectedCategories: [] }">
                                     @foreach ($categories as $category)
                                     <label class="inline-flex items-center px-3.5 py-2 rounded-md border border-transparent transition-all duration-200 cursor-pointer select-none text-sm"
-                                        :class="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 
+                                        :class="(selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})) ? 
                                             'bg-blue-100 text-blue-800 border-blue-200 font-medium shadow-sm' : 
                                             'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100 hover:border-gray-200'">
                                         <input type="checkbox" name="category_id[]" value="{{ $category->id }}" class="hidden"
-                                            :checked="selectedProject?.categories?.some(c => c.id == {{ $category->id }})"
-                                            @change="toggleCategory({{ $category->id }})">
+                                            :checked="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})"
+                                            @change="
+                                                if(selectedCategories.includes({{ $category->id }})) {
+                                                    selectedCategories = selectedCategories.filter(id => id != {{ $category->id }});
+                                                } else {
+                                                    selectedCategories.push({{ $category->id }});
+                                                }
+                                                console.log('Selected categories:', selectedCategories);
+                                            ">
                                         <svg class="w-4 h-4 mr-1.5"
-                                            :class="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 'text-blue-600' : 'text-gray-400'"
+                                            :class="(selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})) ? 'text-blue-600' : 'text-gray-400'"
                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path :stroke-width="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 2 : 1.5"
+                                            <path :stroke-width="(selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})) ? 2 : 1.5"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                                         </svg>
@@ -325,11 +394,31 @@
                                     キャンセル
                                 </button>
 
-                                <button type="submit"
+                                <!-- submit ボタンを通常のボタンに変更し、JavaScript で制御 -->
+                                <button type="button"
                                     class="min-w-[120px] py-3 px-5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-600 shadow-sm transition-colors text-sm font-medium"
                                     :class="{'opacity-50 cursor-not-allowed': isSubmitting}"
                                     :disabled="isSubmitting"
-                                    x-text="selectedProject ? '変更を保存' : 'プロジェクト作成'">
+                                    x-text="selectedProject && selectedProject.id ? '変更を保存' : 'プロジェクト作成'"
+                                    @click="(() => {
+                                        // フォーム検証
+                                        const form = $el.closest('form');
+                                        
+                                        // 明示的にアクションを設定
+                                        if (selectedProject && selectedProject.id) {
+                                            form.action = '{{ url('/projects') }}/' + selectedProject.id;
+                                            const methodInput = form.querySelector('input[name=_method]');
+                                            if (methodInput) methodInput.value = 'PUT';
+                                        } else {
+                                            form.action = '{{ route('projects.store') }}';
+                                        }
+                                        
+                                        console.log('Submitting to: ' + form.action + ' with method: ' + 
+                                                    (form.querySelector('input[name=_method]')?.value || 'POST'));
+                                                
+                                        // フォーム送信
+                                        form.submit();
+                                    })()">
                                 </button>
                             </div>
                         </div>

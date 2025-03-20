@@ -14,7 +14,63 @@ class PhaseController extends Controller
      */
     public function index()
     {
-        $phases = Phase::orderBy('order', 'asc')->get();
+        // 現在のログインユーザーの情報を取得
+        $user = auth()->user();
+        $companyId = $user->company_id;
+        $userDepartmentId = $user->department_id;
+
+        // ログ出力 - デバッグ情報
+        \Log::info('フェーズ一覧取得開始', [
+            'user_id' => $user->id,
+            'company_id' => $companyId,
+            'department_id' => $userDepartmentId,
+            'role' => $user->role
+        ]);
+
+        // 自社の部門IDを取得
+        $departmentIds = Department::where('company_id', $companyId)
+            ->pluck('id')
+            ->toArray();
+
+        // 部門IDログ
+        \Log::info('自社部門ID一覧', ['department_ids' => $departmentIds]);
+
+        // 管理者の場合は会社内の全フェーズ、それ以外は自部門のフェーズのみ
+        if ($user->role === 'admin') {
+            // 管理者: 自社の全部門のフェーズを表示
+            $phases = Phase::whereIn('department_id', $departmentIds)
+                ->orderBy('order', 'asc')
+                ->get();
+        } else {
+            // 一般ユーザー: 自部門のフェーズのみ表示
+            $phases = Phase::where('department_id', $userDepartmentId)
+                ->orderBy('order', 'asc')
+                ->get();
+        }
+
+        // 結果ログ
+        \Log::info('取得フェーズ', [
+            'count' => $phases->count(),
+            'phase_ids' => $phases->pluck('id')->toArray(),
+            'department_ids' => $phases->pluck('department_id')->unique()->toArray()
+        ]);
+
+        // 部門名も表示できるようにリレーションを読み込む
+        $phases->load('department');
+
+        // 部門と会社情報ログ
+        \Log::info('フェーズに関連する部門と会社', [
+            'relations' => $phases->map(function ($phase) {
+                return [
+                    'phase_id' => $phase->id,
+                    'phase_name' => $phase->name,
+                    'department_id' => $phase->department_id,
+                    'department_name' => $phase->department->name ?? 'Unknown',
+                    'company_id' => $phase->department->company_id ?? 'Unknown'
+                ];
+            })->toArray()
+        ]);
+
         return view('phases.index', compact('phases'));
     }
 

@@ -12,13 +12,12 @@
 
             <!-- 会社を選択 -->
             <div class="mb-4">
-                <label for="company_id" class="block text-gray-700 font-medium mb-1">会社を選択 <span class="text-red-500">*</span></label>
-                <select id="company_id" name="company_id"
-                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
-                    @foreach ($companies as $company)
-                    <option value="{{ $company->id }}">{{ $company->name }}</option>
-                    @endforeach
-                </select>
+                <label for="company_id" class="block text-sm font-medium text-gray-700">会社</label>
+                <input type="hidden" name="company_id" value="{{ $company->id }}">
+                <div class="mt-1 p-3 bg-gray-100 rounded-md">
+                    {{ $company->name }} <!-- 会社名を表示するだけ -->
+                </div>
+                <p class="text-xs text-gray-500 mt-1">※ 所属会社は変更できません</p>
             </div>
 
             <!-- 部門名 -->

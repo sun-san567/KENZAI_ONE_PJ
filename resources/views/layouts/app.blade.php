@@ -125,12 +125,15 @@
         <div :class="sidebarOpen ? 'ml-64' : 'ml-16'" class="flex-1 overflow-auto transition-all duration-300 ease-in-out">
             <!-- ヘッダー -->
             <header class="bg-white shadow">
-                <div class="w-full max-w-[95%] xl:max-w-[1280px] 2xl:max-w-[1536px] 3xl:max-w-[1920px] 4xl:max-w-none mx-auto py-4 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        @yield('title', 'ダッシュボード')
+                <div class="w-full max-w-[1280px] 2xl:max-w-[1536px] mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                    <h1 class="text-1xl font-bold text-gray-900 tracking-normal leading-snug drop-shadow-sm">
+                        {{ Auth::user()->company->name ?? '会社未設定' }}
+                        <span class="text-sm font-medium text-gray-600">- {{ Auth::user()->department->name ?? '部門未設定' }}</span>
                     </h1>
                 </div>
+
             </header>
+
 
             <!-- コンテンツ -->
             <main class="w-full max-w-[95%] xl:max-w-[1280px] 2xl:max-w-[1536px] 3xl:max-w-[1920px] 4xl:max-w-none mx-auto py-6 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
