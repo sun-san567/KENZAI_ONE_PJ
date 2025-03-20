@@ -14,15 +14,13 @@ class Project extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
         'phase_id',
         'client_id',
+        'name',
         'description',
         'revenue',
         'profit',
-        'company_id',
-        'department_id',
-        'user_id',
+        'cost',
         'estimate_deadline',
         'start_date',
         'end_date'
@@ -32,8 +30,8 @@ class Project extends Model
         'estimate_deadline' => 'date',
         'start_date' => 'date',
         'end_date' => 'date',
-        'revenue' => 'integer',
-        'profit' => 'integer',
+        'revenue' => 'decimal:2',
+        'profit' => 'decimal:2',
     ];
 
     /**
