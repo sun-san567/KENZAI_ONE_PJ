@@ -339,19 +339,26 @@
                             <!-- カテゴリ選択（タグ形式） -->
                             <div>
                                 <label class="block font-medium mb-1">カテゴリ</label>
-                                <div class="flex flex-wrap gap-2 mt-2">
+                                <div class="flex flex-wrap gap-2 mt-2" x-data="{ selectedCategories: [] }">
                                     @foreach ($categories as $category)
                                     <label class="inline-flex items-center px-3.5 py-2 rounded-md border border-transparent transition-all duration-200 cursor-pointer select-none text-sm"
-                                        :class="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 
+                                        :class="(selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})) ? 
                                             'bg-blue-100 text-blue-800 border-blue-200 font-medium shadow-sm' : 
                                             'bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100 hover:border-gray-200'">
                                         <input type="checkbox" name="category_id[]" value="{{ $category->id }}" class="hidden"
-                                            :checked="selectedProject?.categories?.some(c => c.id == {{ $category->id }})"
-                                            @change="toggleCategory({{ $category->id }})">
+                                            :checked="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})"
+                                            @change="
+                                                if(selectedCategories.includes({{ $category->id }})) {
+                                                    selectedCategories = selectedCategories.filter(id => id != {{ $category->id }});
+                                                } else {
+                                                    selectedCategories.push({{ $category->id }});
+                                                }
+                                                console.log('Selected categories:', selectedCategories);
+                                            ">
                                         <svg class="w-4 h-4 mr-1.5"
-                                            :class="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 'text-blue-600' : 'text-gray-400'"
+                                            :class="(selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})) ? 'text-blue-600' : 'text-gray-400'"
                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path :stroke-width="selectedProject?.categories?.some(c => c.id == {{ $category->id }}) ? 2 : 1.5"
+                                            <path :stroke-width="(selectedProject?.categories?.some(c => c.id == {{ $category->id }}) || selectedCategories.includes({{ $category->id }})) ? 2 : 1.5"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                                         </svg>
