@@ -295,7 +295,7 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">見積期限</label>
                                     <input type="date" name="estimate_deadline"
                                         class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
-                                        :value="selectedProject?.estimate_deadline ?? ''">
+                                        :value="selectedProject?.estimate_deadline ? new Date(selectedProject.estimate_deadline).toISOString().split('T')[0] : ''">
                                 </div>
 
                                 <!-- 着工日 -->
@@ -303,7 +303,7 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">着工日</label>
                                     <input type="date" name="start_date"
                                         class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
-                                        :value="selectedProject?.start_date ?? ''">
+                                        :value="selectedProject?.start_date ? new Date(selectedProject.start_date).toISOString().split('T')[0] : ''">
                                 </div>
 
                                 <!-- 竣工日 -->
@@ -311,9 +311,10 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">竣工日</label>
                                     <input type="date" name="end_date"
                                         class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-indigo-500"
-                                        :value="selectedProject?.end_date ?? ''">
+                                        :value="selectedProject?.end_date ? new Date(selectedProject.end_date).toISOString().split('T')[0] : ''">
                                 </div>
                             </div>
+
 
 
                             <div class="grid grid-cols-2 gap-6">

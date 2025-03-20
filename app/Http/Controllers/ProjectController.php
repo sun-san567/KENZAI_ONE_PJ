@@ -206,6 +206,9 @@ class ProjectController extends Controller
     /**
      * 案件更新処理
      */
+    /**
+     * 案件更新処理
+     */
     public function update(Request $request, Project $project)
     {
         $validated = $request->validate([
@@ -217,27 +220,30 @@ class ProjectController extends Controller
             'profit' => 'nullable|numeric|min:0',
             'estimate_deadline' => 'nullable|date',
             'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'end_date' => 'nullable|date',
             'category_id' => 'nullable|array',
             'category_id.*' => 'exists:categories,id',
         ]);
 
+        // **フォームが空欄なら元のデータを保持**
         $project->update([
             'name' => $validated['name'],
-            'description' => $validated['description'] ?? null,
+            'description' => $validated['description'] ?? $project->description,
             'phase_id' => $validated['phase_id'],
             'client_id' => $validated['client_id'],
-            'revenue' => $validated['revenue'] ?? 0,
-            'profit' => $validated['profit'] ?? 0,
-            'estimate_deadline' => $validated['estimate_deadline'] ?? null,
-            'start_date' => $validated['start_date'] ?? null,
-            'end_date' => $validated['end_date'] ?? null,
+            'revenue' => $validated['revenue'] ?? $project->revenue,
+            'profit' => $validated['profit'] ?? $project->profit,
+            'estimate_deadline' => $validated['estimate_deadline'] ?? $project->estimate_deadline,
+            'start_date' => $validated['start_date'] ?? $project->start_date,
+            'end_date' => $validated['end_date'] ?? $project->end_date,
         ]);
 
+        // **カテゴリの関連付け修正**
         if (!empty($validated['category_id'])) {
             $project->categories()->sync($validated['category_id']);
         } else {
-            $project->categories()->detach();
+            // カテゴリのデータが空でも、既存のカテゴリを削除しない
+            $project->categories()->sync($project->categories->pluck('id')->toArray());
         }
 
         return redirect()->route('projects.index')->with('success', '案件が更新されました！');
