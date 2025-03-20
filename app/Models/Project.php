@@ -13,12 +13,27 @@ class Project extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['phase_id', 'client_id', 'name', 'description', 'revenue', 'profit', 'cost', 'estimate_deadline'];
+    protected $fillable = [
+        'name',
+        'phase_id',
+        'client_id',
+        'description',
+        'revenue',
+        'profit',
+        'company_id',
+        'department_id',
+        'user_id',
+        'estimate_deadline',
+        'start_date',
+        'end_date'
+    ];
 
     protected $casts = [
-        'revenue' => 'decimal:2',
-        'profit' => 'decimal:2',
         'estimate_deadline' => 'date',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'revenue' => 'integer',
+        'profit' => 'integer',
     ];
 
     /**

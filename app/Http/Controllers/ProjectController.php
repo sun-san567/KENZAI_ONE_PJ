@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Project;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ProjectController extends Controller
 {
@@ -117,9 +118,8 @@ class ProjectController extends Controller
 
             // 2️⃣ リクエストデータを確認
             \Log::info("受信データ: ", $request->all());
-            // dd($request->all()); // デバッグコードは削除
 
-            // 3️⃣ バリデーション
+            // 3️⃣ バリデーション（より厳密なルールに修正）
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'phase_id' => 'required|exists:phases,id',
@@ -129,12 +129,22 @@ class ProjectController extends Controller
                 'category_id.*' => 'exists:categories,id',
                 'revenue' => 'nullable|numeric|min:0',
                 'profit' => 'nullable|numeric|min:0',
-                'estimate_deadline' => 'nullable|date', // 日付フィールド追加
-                'start_date' => 'nullable|date',        // 日付フィールド追加
-                'end_date' => 'nullable|date',          // 日付フィールド追加
+                'estimate_deadline' => 'nullable|date',
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date',
             ]);
 
-            // 4️⃣ プロジェクト作成
+            // バリデーション後のデータを確認（デバッグ用）
+            \Log::info("バリデーション後: ", $validated);
+            
+            // 日付データの確認
+            \Log::info("日付データ: ", [
+                'estimate_deadline' => $validated['estimate_deadline'] ?? 'なし',
+                'start_date' => $validated['start_date'] ?? 'なし',
+                'end_date' => $validated['end_date'] ?? 'なし',
+            ]);
+
+            // 4️⃣ プロジェクト作成（Carbon変換追加）
             $project = Project::create([
                 'name' => $validated['name'],
                 'phase_id' => $validated['phase_id'],
@@ -144,14 +154,14 @@ class ProjectController extends Controller
                 'profit' => $validated['profit'] ?? 0,
                 'company_id' => $user->company_id,
                 'department_id' => $user->department_id,
-                'user_id' => $user->id,  // 作成者ID
-                'estimate_deadline' => $validated['estimate_deadline'] ?? null, // 日付フィールド追加
-                'start_date' => $validated['start_date'] ?? null,              // 日付フィールド追加
-                'end_date' => $validated['end_date'] ?? null,                  // 日付フィールド追加
+                'user_id' => $user->id,
+                'estimate_deadline' => isset($validated['estimate_deadline']) ? Carbon::parse($validated['estimate_deadline'])->format('Y-m-d') : null,
+                'start_date' => isset($validated['start_date']) ? Carbon::parse($validated['start_date'])->format('Y-m-d') : null,
+                'end_date' => isset($validated['end_date']) ? Carbon::parse($validated['end_date'])->format('Y-m-d') : null,
             ]);
 
-            \Log::info("プロジェクト作成成功: ", ['project_id' => $project->id]);
-            // dd(Project::all()); // デバッグコードは削除
+            // 作成後のプロジェクトデータを確認
+            \Log::info("作成後のプロジェクト: ", $project->toArray());
 
             // 5️⃣ カテゴリの関連付け
             if (!empty($validated['category_id'])) {
@@ -163,6 +173,7 @@ class ProjectController extends Controller
         } catch (\Exception $e) {
             // エラーログ記録
             \Log::error("プロジェクト作成エラー: " . $e->getMessage());
+            \Log::error("エラートレース: " . $e->getTraceAsString());
 
             return back()->withInput()->with('error', '案件の作成に失敗しました。');
         }
