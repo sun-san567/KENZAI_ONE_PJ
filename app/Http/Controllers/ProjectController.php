@@ -136,7 +136,7 @@ class ProjectController extends Controller
 
             // バリデーション後のデータを確認（デバッグ用）
             \Log::info("バリデーション後: ", $validated);
-            
+
             // 日付データの確認
             \Log::info("日付データ: ", [
                 'estimate_deadline' => $validated['estimate_deadline'] ?? 'なし',
@@ -185,12 +185,23 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
+        // 関連データを取得
         $phases = Phase::orderBy('order')->get();
         $clients = Client::all();
         $categories = Category::all();
 
-        return view('projects.edit', compact('project', 'phases', 'clients', 'categories'));
+        // プロジェクトの既存のカテゴリを取得
+        $selectedCategories = $project->categories->pluck('id')->toArray();
+
+        return view('projects.edit', compact(
+            'project',
+            'phases',
+            'clients',
+            'categories',
+            'selectedCategories'
+        ));
     }
+
 
     /**
      * 案件更新処理
@@ -204,6 +215,9 @@ class ProjectController extends Controller
             'description' => 'nullable|string',
             'revenue' => 'nullable|numeric|min:0',
             'profit' => 'nullable|numeric|min:0',
+            'estimate_deadline' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'category_id' => 'nullable|array',
             'category_id.*' => 'exists:categories,id',
         ]);
@@ -215,6 +229,9 @@ class ProjectController extends Controller
             'client_id' => $validated['client_id'],
             'revenue' => $validated['revenue'] ?? 0,
             'profit' => $validated['profit'] ?? 0,
+            'estimate_deadline' => $validated['estimate_deadline'] ?? null,
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
         ]);
 
         if (!empty($validated['category_id'])) {
