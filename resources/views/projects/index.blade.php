@@ -227,16 +227,16 @@
                     </script>
 
                     <form method="POST"
-                        :action="selectedProject && selectedProject.id 
-                            ? '/projects/' + selectedProject.id 
-                            : '{{ route('projects.store') }}'"
+                        x-data="{ storeUrl: '{{ route('projects.store') }}' }"
+                        :action="selectedProject?.id 
+            ? '{{ route('projects.update', '') }}' + selectedProject.id 
+            : storeUrl"
                         @submit="$store.debug.logForm($event)">
-
 
                         @csrf
 
                         <!-- 編集時に PUT メソッドを適用 -->
-                        <template x-if="selectedProject">
+                        <template x-if="selectedProject?.id">
                             <input type="hidden" name="_method" value="PUT">
                         </template>
 
