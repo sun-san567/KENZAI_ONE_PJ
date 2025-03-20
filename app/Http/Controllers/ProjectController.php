@@ -117,7 +117,7 @@ class ProjectController extends Controller
 
             // 2️⃣ リクエストデータを確認
             \Log::info("受信データ: ", $request->all());
-            dd($request->all()); // 確認後、削除する
+            // dd($request->all()); // デバッグコードは削除
 
             // 3️⃣ バリデーション
             $validated = $request->validate([
@@ -129,6 +129,9 @@ class ProjectController extends Controller
                 'category_id.*' => 'exists:categories,id',
                 'revenue' => 'nullable|numeric|min:0',
                 'profit' => 'nullable|numeric|min:0',
+                'estimate_deadline' => 'nullable|date', // 日付フィールド追加
+                'start_date' => 'nullable|date',        // 日付フィールド追加
+                'end_date' => 'nullable|date',          // 日付フィールド追加
             ]);
 
             // 4️⃣ プロジェクト作成
@@ -142,10 +145,13 @@ class ProjectController extends Controller
                 'company_id' => $user->company_id,
                 'department_id' => $user->department_id,
                 'user_id' => $user->id,  // 作成者ID
+                'estimate_deadline' => $validated['estimate_deadline'] ?? null, // 日付フィールド追加
+                'start_date' => $validated['start_date'] ?? null,              // 日付フィールド追加
+                'end_date' => $validated['end_date'] ?? null,                  // 日付フィールド追加
             ]);
 
             \Log::info("プロジェクト作成成功: ", ['project_id' => $project->id]);
-            dd(Project::all()); // 確認後、削除する
+            // dd(Project::all()); // デバッグコードは削除
 
             // 5️⃣ カテゴリの関連付け
             if (!empty($validated['category_id'])) {
