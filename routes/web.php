@@ -97,3 +97,21 @@ Route::middleware(['auth'])->group(function () {
         return view('home');
     })->name('home');
 });
+
+// 一時的な検証用ルート（確認後削除可能）
+Route::get('/debug-projects', function() {
+    $projects = \App\Models\Project::all();
+    $data = [];
+    
+    foreach ($projects as $project) {
+        $data[] = [
+            'id' => $project->id,
+            'name' => $project->name,
+            'raw_estimate_deadline' => $project->getRawOriginal('estimate_deadline'),
+            'casted_estimate_deadline' => $project->estimate_deadline,
+            'formatted' => $project->estimate_deadline ? \Carbon\Carbon::parse($project->estimate_deadline)->format('Y/m/d') : null
+        ];
+    }
+    
+    return $data;
+});

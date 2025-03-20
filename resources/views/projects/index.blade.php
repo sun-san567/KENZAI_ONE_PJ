@@ -119,6 +119,30 @@
                                 </div>
                             </div>
 
+                            <!-- 見積期限 -->
+                            <div class="mt-1 flex items-center">
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">見積期限：</span>
+                                <p class="text-sm font-medium text-gray-700 ml-1">
+                                    @php
+                                    $deadline = null;
+                                    try {
+                                    $deadline = $project->estimate_deadline ? \Carbon\Carbon::parse($project->estimate_deadline)->format('Y/m/d') : null;
+                                    } catch (\Exception $e) {
+                                    // パースエラー時のフォールバック
+                                    $deadline = $project->estimate_deadline;
+                                    }
+                                    @endphp
+                                    {{ $deadline ?: '未設定' }}
+                                </p>
+                            </div>
+
+                            @if(config('app.debug'))
+                            <!-- デバッグ情報（開発環境のみ表示） -->
+                            <span class="ml-2 text-xs text-red-400">
+                                (Raw: {{ $project->getRawOriginal('estimate_deadline') ?? 'null' }})
+                            </span>
+                            @endif
+
                             <div class="mt-0.5 space-y-1.5">
                                 <div class="flex items-center">
                                     <span class="text-xs text-gray-500 w-16 flex-shrink-0">売上：</span>
