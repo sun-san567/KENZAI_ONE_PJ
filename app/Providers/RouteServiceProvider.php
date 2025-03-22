@@ -8,9 +8,14 @@ use Illuminate\Support\Facades\Route;
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * ログイン後のリダイレクト先
+     * ログイン後のリダイレクト先を取得
      */
-    public const HOME = '/projects';
+    public static function home(): string
+    {
+        return env('APP_ENV') === 'production'
+            ? '/KENZAI_ONE_PJ/projects'
+            : '/projects';
+    }
 
     public function boot(): void
     {
