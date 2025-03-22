@@ -12,6 +12,7 @@ class BuildingMaterialGenreSeeder extends Seeder
 {
     public function run()
     {
+        echo "✅ BuildingMaterialGenreSeeder 開始\n";
         // 初期化（テーブルクリア）
         $this->cleanTables();
 
@@ -421,16 +422,16 @@ class BuildingMaterialGenreSeeder extends Seeder
             // クライアント作成（各会社に3つ）
             for ($i = 1; $i <= 3; $i++) {
                 try {
-                    // ユーザーIDを取得
-                    $manager_id = is_array($user_ids[$company_id])
-                        ? reset($user_ids[$company_id])
-                        : array_values($user_ids[$company_id])[array_rand($user_ids[$company_id])];
+                    // ユーザーIDを取得（ランダム or 先頭）
+                    $selected_user_id = is_array($user_ids[$company_id])
+                        ? array_values($user_ids[$company_id])[array_rand($user_ids[$company_id])]
+                        : $user_ids[$company_id];
 
                     $client_name = "クライアント{$company_id}-{$i}";
                     $client_id = DB::table('clients')->insertGetId([
                         'name' => $client_name,
                         'company_id' => $company_id,
-                        'manager_id' => $manager_id,
+                        'user_id' => $selected_user_id, // ✅ ここをシンプルに修正
                         'address' => '東京都港区芝浦' . rand(1, 5) . '-' . rand(1, 20) . '-' . rand(1, 30),
                         'phone' => sprintf('03-%04d-%04d', rand(1000, 9999), rand(1000, 9999)),
                         'email' => 'client' . $i . '-' . $company_id . '@example.com',
