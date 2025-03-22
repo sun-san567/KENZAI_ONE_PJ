@@ -24,40 +24,23 @@ class TestOrgStructureSeeder extends Seeder
             'address' => '東京都千代田区丸の内1-1-1',
             'phone' => '03-1234-5678',
             'email' => 'info@test-construction.example.com',
-            'established_date' => '2000-01-01',
-            'capital' => 10000000,
-            'representative' => '代表太郎',
-            'description' => 'テスト用の建設会社です。',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
 
-        // 2. 部門の作成
-        $departments = [
-            [
-                'name' => '営業部',
-                'description' => '新規顧客開拓と既存顧客対応を担当',
-            ],
-            [
-                'name' => '技術部',
-                'description' => '建築物の設計と技術的な課題解決を担当',
-            ],
-            [
-                'name' => '施工管理部',
-                'description' => '現場の施工管理を担当',
-            ],
-            [
-                'name' => '管理部',
-                'description' => '社内の総務・人事・経理業務を担当',
-            ],
+        // 2. 部門の作成（実際のカラム構造に合わせて修正）
+        $departmentNames = [
+            '営業部',
+            '技術部',
+            '施工管理部',
+            '管理部'
         ];
 
         $createdDepartments = [];
-        foreach ($departments as $deptData) {
+        foreach ($departmentNames as $deptName) {
             $dept = Department::create([
                 'company_id' => $company->id,
-                'name' => $deptData['name'],
-                'description' => $deptData['description'],
+                'name' => $deptName,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ]);
