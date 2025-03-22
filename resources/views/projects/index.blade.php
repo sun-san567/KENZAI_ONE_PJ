@@ -398,7 +398,7 @@
                         <div class="mt-8 pt-5 border-t border-gray-200">
                             <!-- ファイル管理ナビゲーション - セカンダリーアクション -->
                             <div x-show="selectedProject && selectedProject.id" class="mb-5">
-                                <a :href="`/projects/${selectedProject.id}/files`"
+                                <a :href="`${configAppUrl}/projects/${selectedProject.id}/files`"
                                     class="inline-flex items-center text-blue-600 hover:text-blue-800 py-2.5 px-4 rounded-lg hover:bg-blue-50 transition-colors">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
