@@ -397,19 +397,23 @@
                         <!-- 最適化されたボタンレイアウト -->
                         <div class="mt-8 pt-5 border-t border-gray-200">
                             <!-- ファイル管理ナビゲーション - セカンダリーアクション -->
-                            <div x-show="selectedProject && selectedProject.id" class="mb-5">
-                                <a :href="`/projects/${selectedProject.id}/files`"
-                                    class="inline-flex items-center text-blue-600 hover:text-blue-800 py-2.5 px-4 rounded-lg hover:bg-blue-50 transition-colors">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
-                                    </svg>
-                                    <span>ファイル管理へ移動</span>
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </a>
+                            <div x-data="{ configAppUrl: '{{ url('') }}' }">
+                                <div x-show="selectedProject && selectedProject.id" class="mb-5">
+                                    <a :href="`${configAppUrl}/projects/${selectedProject.id}/files`"
+                                        class="inline-flex items-center text-blue-600 hover:text-blue-800 py-2.5 px-4 rounded-lg hover:bg-blue-50 transition-colors">
+                                        <!-- SVGアイコン略 -->
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        <span>ファイル管理へ移動</span>
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
+
 
                             <!-- プライマリー操作 - 明確な視覚的階層 -->
                             <div class="flex justify-end items-center gap-3">
