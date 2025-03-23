@@ -76,12 +76,15 @@
                                 </a>
 
                                 <!-- 担当者管理ボタン -->
-                                <a href="{{ route('clients.show', $client->id) }}"
-                                    class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md" title="担当者管理">
+                                <a href="{{ route('clients.contacts.index', $client->id) }}"
+                                    class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
+                                    title="担当者管理">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </a>
+
 
                                 <!-- 削除ボタン -->
                                 <form action="{{ route('clients.destroy', $client->id) }}" method="POST" onsubmit="return confirmDelete(event)" class="inline">

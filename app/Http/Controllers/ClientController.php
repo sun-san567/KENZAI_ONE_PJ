@@ -87,4 +87,9 @@ class ClientController extends Controller
         // 成功メッセージを設定し、クライアント一覧ページへリダイレクト
         return redirect()->route('clients.index')->with('success', 'クライアント情報を更新しました。');
     }
+
+    public function show(Client $client)
+    {
+        return view('clients.show', compact('client'));
+    }
 }

@@ -66,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('clients.contacts', ClientContactController::class)->shallow();
 
 
+
     // プロジェクトファイル関連のルート
     Route::prefix('projects/{project}/files')->group(function () {
         Route::get('/', [ProjectFileController::class, 'index'])->name('projects.files.index');
