@@ -9,6 +9,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProjectFileController;
+use App\Http\Controllers\ClientContactController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -61,6 +62,10 @@ Route::middleware(['auth'])->group(function () {
     // 📌 カテゴリ管理
     Route::resource('categories', CategoryController::class);
 
+    // 📌 担当者管理
+    Route::resource('clients.contacts', ClientContactController::class)->shallow();
+
+
     // プロジェクトファイル関連のルート
     Route::prefix('projects/{project}/files')->group(function () {
         Route::get('/', [ProjectFileController::class, 'index'])->name('projects.files.index');
@@ -99,10 +104,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // 一時的な検証用ルート（確認後削除可能）
-Route::get('/debug-projects', function() {
+Route::get('/debug-projects', function () {
     $projects = \App\Models\Project::all();
     $data = [];
-    
+
     foreach ($projects as $project) {
         $data[] = [
             'id' => $project->id,
@@ -112,6 +117,6 @@ Route::get('/debug-projects', function() {
             'formatted' => $project->estimate_deadline ? \Carbon\Carbon::parse($project->estimate_deadline)->format('Y/m/d') : null
         ];
     }
-    
+
     return $data;
 });
