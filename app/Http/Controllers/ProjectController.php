@@ -21,23 +21,27 @@ class ProjectController extends Controller
         $user = auth()->user();
         $companyId = $user->company_id;
         $userDepartmentId = $user->department_id;
-        $isAdmin = $user->role === 'admin';
-
+    
         // 基本クエリ - 自社のクライアントに紐づくプロジェクトのみ
         $query = Project::with(['client', 'phase'])
             ->whereHas('client', function ($q) use ($companyId) {
                 $q->where('company_id', $companyId);
             });
-
+    
+        // 🔹 自部門のフェーズに属するプロジェクトのみ取得
+        $query->whereHas('phase', function ($q) use ($userDepartmentId) {
+            $q->where('department_id', $userDepartmentId);
+        });
+    
         // 検索条件適用
         if ($request->filled('phase_id')) {
             $query->where('phase_id', $request->phase_id);
         }
-
+    
         if ($request->filled('client_id')) {
             $query->where('client_id', $request->client_id);
         }
-
+    
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -47,48 +51,38 @@ class ProjectController extends Controller
                     });
             });
         }
-
+    
         $projects = $query->orderBy('updated_at', 'desc')->paginate(10);
-
+    
         // カテゴリを自社のものだけに制限
         $categories = Category::where('company_id', $companyId)->get();
-
-        // フェーズの制限：管理者なら全社、一般ユーザーなら自部門のみ
-        if ($isAdmin) {
-            // 管理者: 会社の全フェーズを表示
-            $departmentIds = Department::where('company_id', $companyId)->pluck('id');
-            $phases = Phase::whereIn('department_id', $departmentIds)
-                ->with(['projects' => function ($query) use ($companyId) {
-                    $query->whereHas('client', function ($q) use ($companyId) {
-                        $q->where('company_id', $companyId);
-                    });
-                }])
-                ->orderBy('order')
-                ->get();
-        } else {
-            // 一般ユーザー: 自部門のフェーズのみ表示
-            $phases = Phase::where('department_id', $userDepartmentId)
-                ->with(['projects' => function ($query) use ($companyId) {
-                    $query->whereHas('client', function ($q) use ($companyId) {
-                        $q->where('company_id', $companyId);
-                    });
-                }])
-                ->orderBy('order')
-                ->get();
-        }
-
+    
+        // 🔹 フェーズの取得（全ユーザー共通で「自部門のみ」）
+        $phases = Phase::where('department_id', $userDepartmentId)
+            ->with(['projects' => function ($query) use ($companyId) {
+                $query->whereHas('client', function ($q) use ($companyId) {
+                    $q->where('company_id', $companyId);
+                });
+            }])
+            ->orderBy('order')
+            ->get();
+    
         // クライアントも自社のみ
         $clients = Client::where('company_id', $companyId)->get();
-
+    
         // プロジェクトごとのカテゴリ情報をロード
         foreach ($projects as $project) {
             $project->load(['categories' => function ($query) use ($companyId) {
                 $query->where('company_id', $companyId);
             }]);
         }
-
+    
+        // 今は全員部門固定。将来的に isAdmin を使う場合に備えて残しておく。
+        $isAdmin = $user->role === 'admin';
+    
         return view('projects.index', compact('projects', 'categories', 'phases', 'clients', 'isAdmin'));
     }
+    
 
     /**
      * 案件作成ページ

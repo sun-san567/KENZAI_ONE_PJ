@@ -27,7 +27,7 @@ class PhaseController extends Controller
             'role' => $user->role
         ]);
 
-        // 自社の部門IDを取得
+        // 自社の部門IDを取得（将来の部門切替に備えて残しておく）
         $departmentIds = Department::where('company_id', $companyId)
             ->pluck('id')
             ->toArray();
@@ -35,18 +35,10 @@ class PhaseController extends Controller
         // 部門IDログ
         \Log::info('自社部門ID一覧', ['department_ids' => $departmentIds]);
 
-        // 管理者の場合は会社内の全フェーズ、それ以外は自部門のフェーズのみ
-        if ($user->role === 'admin') {
-            // 管理者: 自社の全部門のフェーズを表示
-            $phases = Phase::whereIn('department_id', $departmentIds)
-                ->orderBy('order', 'asc')
-                ->get();
-        } else {
-            // 一般ユーザー: 自部門のフェーズのみ表示
-            $phases = Phase::where('department_id', $userDepartmentId)
-                ->orderBy('order', 'asc')
-                ->get();
-        }
+        // 現在はロールに関係なく「自部門のフェーズのみ」を表示
+        $phases = Phase::where('department_id', $userDepartmentId)
+            ->orderBy('order', 'asc')
+            ->get();
 
         // 結果ログ
         \Log::info('取得フェーズ', [
@@ -73,6 +65,7 @@ class PhaseController extends Controller
 
         return view('phases.index', compact('phases'));
     }
+
 
     /**
      * フェーズ作成フォームを表示 (管理者・部門管理者のみ)
