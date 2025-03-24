@@ -64,7 +64,13 @@
                             <div class="font-medium text-gray-800">{{ $client->name }}</div>
                         </td>
                         <td class="px-6 py-4 text-gray-700">{{ $client->phone }}</td>
-                        <td class="px-6 py-4 text-gray-700 truncate max-w-xs" title="{{ $client->address }}">{{ $client->address }}</td>
+                        <td class="px-6 py-4 text-gray-700">
+                            <div class="max-w-[200px] truncate whitespace-nowrap overflow-hidden" title="{{ $client->address }}">
+                                {{ $client->address }}
+                            </div>
+                        </td>
+
+
                         <td class="px-6 py-4 text-right text-sm">
                             <div class="flex justify-end space-x-2">
                                 <!-- 編集ボタン -->
