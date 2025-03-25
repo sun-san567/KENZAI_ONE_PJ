@@ -83,6 +83,12 @@
                                 <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span>
                                 <p class="text-sm font-medium text-green-700 ml-1">¥{{ number_format($project->profit ?? 0) }}</p>
                             </div>
+                            @if(isset($project->estimate_deadline))
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">見積期限：</span>
+                                <p class="text-sm font-medium text-yellow-700 ml-1">{{ $project->estimate_deadline->format('Y/m/d') }}</p>
+                            </div>
+                            @endif
                         </div>
 
                         @if(count($project->categories) > 0)
@@ -119,22 +125,7 @@
                                 </div>
                             </div>
 
-                            <!-- 見積期限 -->
-                            <div class="mt-1 flex items-center">
-                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">見積期限：</span>
-                                <p class="text-sm font-medium text-gray-700 ml-1">
-                                    @php
-                                    $deadline = null;
-                                    try {
-                                    $deadline = $project->estimate_deadline ? \Carbon\Carbon::parse($project->estimate_deadline)->format('Y/m/d') : null;
-                                    } catch (\Exception $e) {
-                                    // パースエラー時のフォールバック
-                                    $deadline = $project->estimate_deadline;
-                                    }
-                                    @endphp
-                                    {{ $deadline ?: '未設定' }}
-                                </p>
-                            </div>
+
 
                             @if(config('app.debug'))
                             <!-- デバッグ情報（開発環境のみ表示） -->
