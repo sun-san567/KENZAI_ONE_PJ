@@ -63,7 +63,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class);
 
     // 📌 担当者管理
-    Route::resource('clients.contacts', ClientContactController::class)->shallow();
+    Route::resource('clients.contacts', ClientContactController::class)
+        ->except(['show'])  // showアクションは不要なので除外
+        ->middleware(['auth', 'verified']);  // 認証済みユーザーのみアクセス可能
 
 
 

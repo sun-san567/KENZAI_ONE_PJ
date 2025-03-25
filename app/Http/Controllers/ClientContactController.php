@@ -13,10 +13,10 @@ class ClientContactController extends Controller
      */
     public function index(Client $client)
     {
-        // クライアントとその担当者リレーションをロード
-        $client->load('contacts');
+        // クライアントの担当者をページネーション付きで取得
+        $contacts = $client->contacts()->paginate(10);  // 1ページあたり10件表示
 
-        return view('clients.contacts.index', compact('client'));
+        return view('clients.contacts.index', compact('client', 'contacts'));
     }
 
 
@@ -43,7 +43,7 @@ class ClientContactController extends Controller
 
         $client->contacts()->create($validated);
 
-        return redirect()->route('clients.show', $client->id)
+        return redirect()->route('clients.contacts.index', $client->id)
             ->with('success', '担当者を追加しました');
     }
 
@@ -59,19 +59,27 @@ class ClientContactController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ClientContact $contact)
+    public function edit(Client $client, ClientContact $contact)
     {
-        $client = $contact->client; // 所属クライアントを取得
+        // 権限チェック：このクライアントに属する担当者かどうか
+        if ($contact->client_id !== $client->id) {
+            abort(404);
+        }
 
-        return view('clients.contacts.edit', compact('contact', 'client'));
+        return view('clients.contacts.edit', compact('client', 'contact'));
     }
 
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ClientContact $contact)
+    public function update(Request $request, Client $client, ClientContact $contact)
     {
+        // 権限チェック
+        if ($contact->client_id !== $client->id) {
+            abort(404);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'position' => 'nullable|string|max:100',
@@ -82,20 +90,23 @@ class ClientContactController extends Controller
 
         $contact->update($validated);
 
-        return redirect()->route('clients.show', $contact->client_id)
+        return redirect()->route('clients.contacts.index', $client->id)
             ->with('success', '担当者情報を更新しました');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ClientContact $contact)
+    public function destroy(Client $client, ClientContact $contact)
     {
-        $clientId = $contact->client_id;
+        // 権限チェック
+        if ($contact->client_id !== $client->id) {
+            abort(404);
+        }
 
         $contact->delete();
 
-        return redirect()->route('clients.show', $clientId)
+        return redirect()->route('clients.contacts.index', $client->id)
             ->with('success', '担当者を削除しました');
     }
 }
