@@ -42,13 +42,16 @@
             <table class="w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                            並び順
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
                             フェーズ名
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
                             説明
                         </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                             操作
                         </th>
                     </tr>
@@ -56,6 +59,9 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($phases as $phase)
                     <tr class="odd:bg-white even:bg-gray-50 hover:bg-blue-50/30 transition-colors">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-700">
+                            {{ $phase->order }}
+                        </td>
                         <td class="px-6 py-4">
                             <div class="font-medium text-gray-800">{{ $phase->name }}</div>
                         </td>

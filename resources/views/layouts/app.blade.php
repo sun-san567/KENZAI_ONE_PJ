@@ -49,10 +49,62 @@
         .font-medium {
             font-weight: 500;
         }
+
+        /* カラーパレットの統一 */
+        .text-heading-primary {
+            @apply text-slate-800;
+            /* 主要見出し */
+        }
+
+        .text-heading-secondary {
+            @apply text-slate-700;
+            /* 副見出し */
+        }
+
+        .text-body {
+            @apply text-slate-700;
+            /* 本文テキスト */
+        }
+
+        .text-muted {
+            @apply text-slate-500;
+            /* 補足テキスト */
+        }
+
+        .text-link {
+            @apply text-indigo-600 hover:text-indigo-700;
+            /* リンクテキスト */
+        }
+
+        /* 意味を持つ色 */
+        .text-success {
+            @apply text-emerald-600;
+            /* 成功メッセージ */
+        }
+
+        .text-warning {
+            @apply text-amber-600;
+            /* 警告メッセージ */
+        }
+
+        .text-danger {
+            @apply text-rose-600;
+            /* エラーメッセージ */
+        }
+
+        .text-info {
+            @apply text-sky-600;
+            /* 情報メッセージ */
+        }
     </style>
 </head>
 
-<body x-data="{ sidebarOpen: true }" class="bg-gray-100">
+<body
+    x-data="{ 
+    sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? 'true') 
+  }"
+    x-init="$watch('sidebarOpen', value => localStorage.setItem('sidebarOpen', value))"
+    class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
         <!-- サイドバー -->
         <div :class="sidebarOpen ? 'w-64' : 'w-16'"
