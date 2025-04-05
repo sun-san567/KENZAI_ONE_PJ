@@ -27,6 +27,68 @@
         </button>
     </div>
 
+    <!-- コンパクト検索フォーム -->
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-6" x-data="{ showAdvanced: false }">
+        <form action="{{ route('projects.index') }}" method="GET">
+            <!-- メイン検索欄 -->
+            <div class="flex gap-2 items-center">
+                <div class="flex-grow">
+                    <div class="relative rounded-md shadow-sm">
+                        <input type="text" id="search_keyword" name="search_keyword" value="{{ request('search_keyword') }}"
+                               placeholder="プロジェクト名・取引先で検索"
+                               class="w-full rounded-md border-gray-300 pr-10 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <button type="submit" class="text-gray-400 hover:text-gray-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" @click="showAdvanced = !showAdvanced" class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center">
+                    <span x-text="showAdvanced ? '基本検索' : '詳細検索'"></span>
+                    <svg x-show="!showAdvanced" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg x-show="showAdvanced" class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                </button>
+                
+                <a href="{{ route('projects.index') }}" class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    クリア
+                </a>
+            </div>
+            
+            <!-- 詳細検索オプション -->
+            <div x-show="showAdvanced" x-transition class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-3 border-t border-gray-200">
+                <!-- プロジェクト名 -->
+                <div>
+                    <label for="search_name" class="block text-sm font-medium text-gray-700 mb-1">プロジェクト名</label>
+                    <input type="text" id="search_name" name="search_name" value="{{ request('search_name') }}"
+                           class="w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+                
+                <!-- 取引先名 -->
+                <div>
+                    <label for="search_client" class="block text-sm font-medium text-gray-700 mb-1">取引先名</label>
+                    <input type="text" id="search_client" name="search_client" value="{{ request('search_client') }}"
+                           class="w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+                
+                <!-- 見積期限 -->
+                <div>
+                    <label for="search_estimate_deadline" class="block text-sm font-medium text-gray-700 mb-1">見積期限</label>
+                    <input type="date" id="search_estimate_deadline" name="search_estimate_deadline" value="{{ request('search_estimate_deadline') }}"
+                           class="w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+                
+                <!-- 竣工日 -->
+                <div>
+                    <label for="search_end_date" class="block text-sm font-medium text-gray-700 mb-1">竣工日</label>
+                    <input type="date" id="search_end_date" name="search_end_date" value="{{ request('search_end_date') }}"
+                           class="w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+            </div>
+        </form>
+    </div>
+
     <!-- 📌 モバイル用: フローティングボタン -->
     <!-- <button @click="openModal = true; selectedProject = { categories: [] }"
         x-show="!openModal"
@@ -174,7 +236,7 @@
                     <div class="flex justify-center mt-2 bg-white">
                         <button class="show-more-btn text-sm text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors flex items-center">
                             <span>もっと見る</span>
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
