@@ -47,13 +47,24 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
                     <tr class="hover:bg-gray-50 transition"></tr>
-                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->name }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-800">
-                        <div class="truncate" title="{{ $company->address }}">{{ $company->address }}</div>
+                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap" title="{{ $company->name }}">
+                        <span class="hidden md:inline">{{ Str::limit($company->name, 18) }}</span>
+                        <span class="hidden lg:inline">{{ Str::limit($company->name, 15) }}</span>
+                        <span class="hidden xl:inline">{{ $company->name }}</span>
+                        <span class="inline md:hidden">{{ Str::limit($company->name, 5) }}</span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->phone }}</td>
                     <td class="px-6 py-4 text-sm text-gray-800">
-                        <div class="truncate" title="{{ $company->email }}">{{ $company->email }}</div>
+                        <div class="truncate max-w-[60px] sm:max-w-[100px] md:max-w-[150px] lg:max-w-[250px] xl:max-w-full" title="{{ $company->address }}">
+                            {{ $company->address }}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap" title="{{ $company->phone }}">
+                        {{ $company->phone }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-800">
+                        <div class="truncate max-w-[80px] sm:max-w-[120px] md:max-w-[180px] lg:max-w-[250px]" title="{{ $company->email }}">
+                            {{ $company->email }}
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <a href="{{ route('company.edit', $company->id) }}"
