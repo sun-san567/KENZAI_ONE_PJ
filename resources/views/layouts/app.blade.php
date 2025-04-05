@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,49 @@
     <title>KENZAI-ONE</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- フォントの追加 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- カスタムスタイル -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 日本語のフォントサイズとウェイトの調整 */
+        .text-xs {
+            font-size: 0.75rem;
+            letter-spacing: 0.025em;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+            letter-spacing: 0.015em;
+            line-height: 1.5;
+        }
+
+        .text-base {
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+            line-height: 1.6;
+        }
+
+        .text-lg,
+        .text-xl,
+        .text-2xl {
+            letter-spacing: -0.01em;
+        }
+
+        /* 日本語のフォントウェイト調整 */
+        .font-medium {
+            font-weight: 500;
+        }
+    </style>
 </head>
 
 <body x-data="{ sidebarOpen: true }" class="bg-gray-100">

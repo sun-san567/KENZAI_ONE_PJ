@@ -28,13 +28,13 @@
     </div>
 
     <!-- 📌 モバイル用: フローティングボタン -->
-    <button @click="openModal = true; selectedProject = { categories: [] }"
+    <!-- <button @click="openModal = true; selectedProject = { categories: [] }"
         x-show="!openModal"
         x-cloak
         class="fixed md:hidden z-50 shadow-lg transition hover:shadow-xl hover:scale-105
                bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full">
         +
-    </button>
+    </button> -->
 
     <!-- 画面上部に表示するステータス -->
     <!-- <div class="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
@@ -62,7 +62,10 @@
                     <!-- 最初の5つのプロジェクトを表示 -->
                     @foreach($phase->projects->take(5) as $index => $project)
                     <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors"
-                        @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                        @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'"
+                        @if($project->is_deadline_today)
+                        border-2 border-red-500 bg-red-50
+                        @endif">
                         <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
                         <!-- <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p> -->
 
@@ -86,6 +89,7 @@
                             @if(isset($project->estimate_deadline))
                             <div class="flex items-center">
                                 <span class="text-xs text-gray-500 w-16 flex-shrink-0">見積期限：</span>
+                                <!-- <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span> -->
                                 <p class="text-sm font-medium text-yellow-700 ml-1">{{ $project->estimate_deadline->format('Y/m/d') }}</p>
                             </div>
                             @endif
@@ -113,7 +117,10 @@
                     <div class="hidden-projects hidden">
                         @foreach($phase->projects->skip(5) as $project)
                         <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors mt-4"
-                            @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                            @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'"
+                            @if($project->is_deadline_today)
+                            border-2 border-red-500 bg-red-50
+                            @endif">
                             <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
                             <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p>
 
