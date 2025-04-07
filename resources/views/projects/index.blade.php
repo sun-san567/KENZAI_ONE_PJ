@@ -382,17 +382,57 @@
                                 </div>
 
                                 <!-- 顧客 -->
-                                <div class="mb-4">
+                                <div class="mb-4" x-data="{
+                                    clients: {{ $clients->toJson() }},
+                                    keyword: '',
+                                    get filteredClients() {
+                                        if (!this.keyword.trim()) return this.clients;
+                                        const searchTerm = this.keyword.toLowerCase().trim();
+                                        return this.clients.filter(client => 
+                                            client.name.toLowerCase().includes(searchTerm)
+                                        );
+                                    }
+                                }">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">顧客</label>
-                                    <select name="client_id"
-                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
-                                        @foreach ($clients as $client)
-                                        <option value="{{ $client->id }}"
-                                            x-bind:selected="selectedProject && selectedProject.client_id == {{ $client->id }}">
-                                            {{ $client->name }}
-                                        </option>
-                                        @endforeach
-                                    </select>
+
+                                    <!-- 検索ボックス -->
+                                    <div class="relative mb-2">
+                                        <input type="text"
+                                            x-model="keyword"
+                                            placeholder="顧客名で検索..."
+                                            class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 text-sm">
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none" x-show="keyword">
+                                            <button type="button" @click="keyword = ''" class="text-gray-400 hover:text-gray-600">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 絞り込み適用されるセレクトボックス -->
+                                    <div class="relative">
+                                        <select name="client_id"
+                                            class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
+                                            <template x-for="client in filteredClients" :key="client.id">
+                                                <option :value="client.id"
+                                                    x-text="client.name"
+                                                    :selected="selectedProject && selectedProject.client_id == client.id">
+                                                </option>
+                                            </template>
+                                        </select>
+
+                                        <!-- 検索結果カウンター -->
+                                        <div class="absolute right-2 top-2 bg-gray-100 px-1.5 py-0.5 rounded text-xs text-gray-500"
+                                            x-show="keyword.trim()">
+                                            <span x-text="filteredClients.length"></span>件
+                                        </div>
+                                    </div>
+
+                                    <!-- 検索結果がない場合のメッセージ -->
+                                    <div class="text-sm text-gray-500 mt-1" x-show="keyword.trim() && filteredClients.length === 0">
+                                        「<span x-text="keyword"></span>」に一致する顧客はありません
+                                    </div>
                                 </div>
                             </div>
 
