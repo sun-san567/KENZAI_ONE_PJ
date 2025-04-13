@@ -393,51 +393,36 @@
                                         );
                                     }
                                 }">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">顧客</label>
-
-                                    <!-- 検索ボックス -->
-                                    <div class="relative mb-2">
-                                        <input type="text"
-                                            x-model="keyword"
-                                            placeholder="顧客名で検索..."
-                                            class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 text-sm">
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none" x-show="keyword">
-                                            <button type="button" @click="keyword = ''" class="text-gray-400 hover:text-gray-600">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-
                                     <!-- 絞り込み適用されるセレクトボックス -->
-                                    <div class="relative">
-                                        <select name="client_id"
-                                            class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
-                                            <template x-for="client in filteredClients" :key="client.id">
-                                                <option :value="client.id"
-                                                    x-text="client.name"
-                                                    :selected="selectedProject && selectedProject.client_id == client.id">
-                                                </option>
-                                            </template>
-                                        </select>
+                                    <div x-data="clientSelector()" class="mb-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">顧客</label>
 
-                                        <!-- 検索結果カウンター -->
-                                        <div class="absolute right-2 top-2 bg-gray-100 px-1.5 py-0.5 rounded text-xs text-gray-500"
-                                            x-show="keyword.trim()">
-                                            <span x-text="filteredClients.length"></span>件
+                                        <div class="relative border border-gray-300 rounded-md shadow-sm">
+                                            <!-- 検索input -->
+                                            <input type="text" x-model="keyword" placeholder="顧客名で検索"
+                                                class="w-full px-3 py-2 rounded-t-md focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+                                            <!-- セレクトボックス -->
+                                            <select name="client_id"
+                                                class="w-full px-3 py-2 rounded-b-md border-t border-gray-300 focus:ring-2 focus:ring-blue-400">
+                                                <template x-for="client in filteredClients" :key="client.id">
+                                                    <option :value="client.id" x-text="client.name"
+                                                        :selected="selectedProject && selectedProject.client_id == client.id"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <!-- 0件時の案内 -->
+                                        <div class="text-sm text-gray-500 mt-1" x-show="keyword.trim() && filteredClients.length === 0">
+                                            「<span x-text="keyword"></span>」に一致する顧客はありません
                                         </div>
                                     </div>
 
-                                    <!-- 検索結果がない場合のメッセージ -->
-                                    <div class="text-sm text-gray-500 mt-1" x-show="keyword.trim() && filteredClients.length === 0">
-                                        「<span x-text="keyword"></span>」に一致する顧客はありません
-                                    </div>
                                 </div>
                             </div>
 
                             <!-- 説明 -->
-                            <div class="mb-4">
+                            <div class="mb-0.5">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">説明</label>
                                 <textarea name="description"
                                     class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 h-32"
@@ -528,7 +513,6 @@
                                     <span x-text="selectedCategories.length + ' 個のカテゴリが選択されています'"></span>
                                 </div>
                             </div>
-
                         </div>
 
                         <!-- 最適化されたボタンレイアウト -->
