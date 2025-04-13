@@ -109,4 +109,10 @@ class Project extends Model
             ]);
         });
     }
+
+    // クライアント to プロジェクトの関連付け
+    public function clients()
+    {
+        return $this->belongsToMany(Client::class, 'client_project')->withTimestamps();
+    }
 }
