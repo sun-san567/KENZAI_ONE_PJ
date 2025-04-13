@@ -95,7 +95,16 @@
         @endif
 
         <div class="mt-6 pt-4 border-t border-gray-200">
-            <form id="fileSearchForm" class="max-w-2xl mx-auto flex gap-4 items-center">
+            <form id="fileSearchForm"
+                class="max-w-2xl mx-auto flex gap-4 items-center"
+                x-data="{
+          clearForm() {
+              document.getElementById('searchInput').value = '';
+              document.getElementById('fileTypeSelect').value = '';
+              $nextTick(() => { document.getElementById('fileSearchForm').submit(); });
+          }
+      }">
+
                 <!-- 検索ボックス -->
                 <div class="relative flex-grow">
                     <i class="fas fa-search absolute left-3 top-3.5 text-gray-600"></i>
@@ -125,14 +134,23 @@
                     <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
                 </div>
 
+                <div class="flex flex-wrap gap-3">
 
-                <!-- 検索ボタン -->
-                <button
-                    type="submit"
-                    class="w-[220px] py-3 bg-blue-500 text-white text-lg font-semibold rounded-md shadow-md hover:bg-blue-600 hover:shadow-lg flex items-center justify-center gap-2 transition-all duration-300">
-                    <i class="fas fa-search"></i>検索する
-                    　　
-                </button>
+                    <!-- 検索ボタン -->
+                    <button type="submit"
+                        class="w-[220px] px-4 py-3 pr-4 bg-blue-500 text-white text-lg font-semibold rounded-md shadow-sm hover:bg-blue-600 hover:shadow-lg flex items-center justify-center gap-2 transition-all duration-300">
+                        <i class="fas fa-search text-[16px]"></i>
+                        <span>検索</span>
+                    </button>
+
+                    <!-- クリアボタン -->
+                    <button type="button"
+                        @click="clearForm()"
+                        class="w-[220px] px-4 py-3 pr-6 bg-gray-300 text-gray-700 text-lg font-semibold rounded-md shadow-sm hover:bg-gray-400 hover:shadow-lg flex items-center justify-center gap-2 transition-all duration-300">
+                        <i class="fas fa-undo text-[16px]"></i>
+                        <span>クリア</span>
+                    </button>
+                </div>
 
             </form>
 
