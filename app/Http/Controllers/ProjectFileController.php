@@ -52,13 +52,31 @@ class ProjectFileController extends Controller
                 // 必要に応じてdescriptionなど他のフィールドも検索
             }
 
-            // ファイルタイプでフィルタリング（簡略化）
+            // ファイルタイプでフィルタリング
             if ($fileType) {
-                $query->where('mime_type', 'like', $fileType . '%');
+                switch ($fileType) {
+                    case 'pdf':
+                        $query->where('file_extension', 'pdf');
+                        break;
+
+                    case 'doc':
+                        $query->whereIn('file_extension', ['doc', 'docx']);
+                        break;
+
+                    case 'xls':
+                        $query->whereIn('file_extension', ['xls', 'xlsx']);
+                        break;
+
+                    case 'img':
+                        $query->whereIn('file_extension', ['jpg', 'jpeg', 'png', 'gif']);
+                        break;
+                }
             }
 
             // ファイルを取得
-            $files = $query->orderBy('created_at', 'desc')->paginate(10);
+            $files = $query->orderBy('file_extension', 'asc')
+                ->paginate(10)
+                ->withQueryString();
 
             // AJAXリクエストの場合
             if ($request->ajax() || $request->has('ajax')) {
