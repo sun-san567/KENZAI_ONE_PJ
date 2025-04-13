@@ -124,6 +124,7 @@
                         name="type"
                         class="border border-gray-400 bg-gray-50 rounded-md p-3.5 text-lg shadow-sm max-w-[220px] appearance-none pr-10">
                         <option value="">📂 すべて</option>
+                        <option value="favorite">⭐ お気に入り</option>
                         <option value="pdf">📄 PDF</option>
                         <option value="doc">📝 Word</option>
                         <option value="xls">📊 Excel</option>

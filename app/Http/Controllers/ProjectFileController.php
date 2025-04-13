@@ -55,6 +55,11 @@ class ProjectFileController extends Controller
             // ファイルタイプでフィルタリング
             if ($fileType) {
                 switch ($fileType) {
+                    case 'favorite':
+                        $favoriteIds = auth()->user()->favoriteProjectFiles->pluck('id');
+                        $query->whereIn('id', $favoriteIds);
+                        break;
+
                     case 'pdf':
                         $query->where('file_extension', 'pdf');
                         break;
@@ -359,5 +364,18 @@ class ProjectFileController extends Controller
 
         // 対応していないファイル形式
         return response()->json(['error' => 'このファイル形式はプレビューに対応していません'], 400);
+    }
+
+    // お気に入りファイル処理
+    public function favorite(ProjectFile $projectFile)
+    {
+        auth()->user()->favoriteProjectFiles()->attach($projectFile->id);
+        return back();
+    }
+
+    public function unfavorite(ProjectFile $projectFile)
+    {
+        auth()->user()->favoriteProjectFiles()->detach($projectFile->id);
+        return back();
     }
 }

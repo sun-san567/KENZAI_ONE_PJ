@@ -313,12 +313,12 @@
                             :class="activeTab === 'edit' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'">
                             案件詳細
                         </button>
-                        <!-- <button @click="activeTab = 'files'"
-                        class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
-                        :class="activeTab === 'files' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'"
-                        x-show="selectedProject">
-                        ファイル管理
-                    </button> -->
+                        <button @click="activeTab = 'files'"
+                            class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
+                            :class="activeTab === 'files' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'"
+                            x-show="selectedProject">
+                            クライアント
+                        </button>
                     </div>
 
                     <!-- 📌 案件編集タブ -->

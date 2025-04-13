@@ -308,16 +308,40 @@
                                         </div>
                                     </td>
                                     <!-- 操作ボタン -->
+
+
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-center space-x-4">
+
+                                            <!-- お気に入りボタン -->
+                                            <form id="favorite-form-{{ $file->id }}"
+                                                action="{{ auth()->user()->favoriteProjectFiles->contains($file->id) 
+                                                          ? route('project-files.unfavorite', $file->id) 
+                                                          : route('project-files.favorite', $file->id) }}"
+                                                method="POST" class="inline-block">
+                                                @csrf
+                                                @if(auth()->user()->favoriteProjectFiles->contains($file->id))
+                                                @method('DELETE')
+                                                @endif
+
+                                                <button type="submit"
+                                                    class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50"
+                                                    title="{{ auth()->user()->favoriteProjectFiles->contains($file->id) ? 'お気に入り解除' : 'お気に入り追加' }}">
+
+                                                    @if(auth()->user()->favoriteProjectFiles->contains($file->id))
+                                                    <x-icons.star-on class="w-5 h-5 text-yellow-400" />
+                                                    @else
+                                                    <x-icons.star-off class="w-5 h-5 text-gray-300 hover:text-yellow-400" />
+                                                    @endif
+                                                </button>
+                                            </form>
+
                                             <!-- ダウンロードボタン -->
                                             <a href="{{ route('projects.files.download', [$project->id, $file->id]) }}"
                                                 class="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md shadow-md hover:shadow-lg transition-all duration-200 leading-none">
                                                 <span class="inline-flex items-center gap-2">
-                                                    <!-- SVGアイコン（ダウンロード） -->
                                                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M12 4v12m0 0l-4-4m4 4l4-4m-8 4h8"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4m-8 4h8"></path>
                                                     </svg>
                                                     <span class="hidden sm:inline">ダウンロード</span>
                                                 </span>
@@ -333,17 +357,17 @@
                                                 <button type="submit"
                                                     class="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-md shadow-md hover:shadow-lg transition-all duration-200 leading-none">
                                                     <span class="inline-flex items-center gap-2">
-                                                        <!-- SVGアイコン（削除） -->
                                                         <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                         </svg>
                                                         <span class="hidden sm:inline">削除</span>
                                                     </span>
                                                 </button>
                                             </form>
+
                                         </div>
                                     </td>
+
 
                                 </tr>
                                 @empty

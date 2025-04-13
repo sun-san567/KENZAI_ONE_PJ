@@ -104,6 +104,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', function () {
         return view('home');
     })->name('home');
+
+    // ファイルお気に入り
+    Route::post('/project-files/{projectFile}/favorite', [ProjectFileController::class, 'favorite'])->name('project-files.favorite');
+    Route::delete('/project-files/{projectFile}/favorite', [ProjectFileController::class, 'unfavorite'])->name('project-files.unfavorite');
 });
 
 // 一時的な検証用ルート（確認後削除可能）
