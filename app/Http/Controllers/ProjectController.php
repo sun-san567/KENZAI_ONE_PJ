@@ -21,12 +21,20 @@ class ProjectController extends Controller
         $user = auth()->user();
         $companyId = $user->company_id;
         $userDepartmentId = $user->department_id;
-        $isAdmin = $user->role === 'admin';
 
-        // 基本クエリ - 自社のクライアントに紐づくプロジェクトのみ
-        $query = Project::with(['client', 'phase'])
+        // プロジェクト基本クエリ
+        $query = Project::with([
+            'client',
+            'phase',
+            'categories' => function ($q) use ($companyId) {
+                $q->where('company_id', $companyId);
+            }
+        ])
             ->whereHas('client', function ($q) use ($companyId) {
                 $q->where('company_id', $companyId);
+            })
+            ->whereHas('phase', function ($q) use ($userDepartmentId) {
+                $q->where('department_id', $userDepartmentId);
             });
 
         // 検索条件適用
@@ -38,57 +46,62 @@ class ProjectController extends Controller
             $query->where('client_id', $request->client_id);
         }
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('client', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
+        if ($request->filled('search_name')) {
+            $query->where('name', 'like', '%' . $request->search_name . '%');
+        }
+
+        if ($request->filled('search_client')) {
+            $query->whereHas('client', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search_client . '%');
             });
         }
 
-        $projects = $query->orderBy('updated_at', 'desc')->paginate(10);
+        if ($request->filled('search_estimate_deadline')) {
+            $query->whereDate('estimate_deadline', $request->search_estimate_deadline);
+        }
 
-        // カテゴリを自社のものだけに制限
+        if ($request->filled('search_end_date')) {
+            $query->whereDate('end_date', $request->search_end_date);
+        }
+
+        // ソート（見積期限優先、未設定は最後）
+        $projects = $query->orderByRaw("
+            CASE 
+                WHEN estimate_deadline IS NULL THEN 1
+                ELSE 0
+            END, estimate_deadline ASC
+        ")
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        // デバッグログ（開発時のみ）
+        \Log::info('検索条件', $request->all());
+        \Log::info('取得件数: ' . $projects->total());
+
+        // カテゴリ（自社のみ）
         $categories = Category::where('company_id', $companyId)->get();
 
-        // フェーズの制限：管理者なら全社、一般ユーザーなら自部門のみ
-        if ($isAdmin) {
-            // 管理者: 会社の全フェーズを表示
-            $departmentIds = Department::where('company_id', $companyId)->pluck('id');
-            $phases = Phase::whereIn('department_id', $departmentIds)
-                ->with(['projects' => function ($query) use ($companyId) {
-                    $query->whereHas('client', function ($q) use ($companyId) {
-                        $q->where('company_id', $companyId);
-                    });
-                }])
-                ->orderBy('order')
-                ->get();
-        } else {
-            // 一般ユーザー: 自部門のフェーズのみ表示
-            $phases = Phase::where('department_id', $userDepartmentId)
-                ->with(['projects' => function ($query) use ($companyId) {
-                    $query->whereHas('client', function ($q) use ($companyId) {
-                        $q->where('company_id', $companyId);
-                    });
-                }])
-                ->orderBy('order')
-                ->get();
-        }
+        // フェーズ（自部門のみ）
+        $phases = Phase::where('department_id', $userDepartmentId)
+            ->with(['projects' => function ($query) use ($companyId) {
+                $query->whereHas('client', function ($q) use ($companyId) {
+                    $q->where('company_id', $companyId);
+                });
+            }])
+            ->orderBy('order')
+            ->get();
 
-        // クライアントも自社のみ
+        // クライアント（自社のみ）
         $clients = Client::where('company_id', $companyId)->get();
 
-        // プロジェクトごとのカテゴリ情報をロード
-        foreach ($projects as $project) {
-            $project->load(['categories' => function ($query) use ($companyId) {
-                $query->where('company_id', $companyId);
-            }]);
-        }
+        // 管理者判定（将来用）
+        $isAdmin = $user->role === 'admin';
 
         return view('projects.index', compact('projects', 'categories', 'phases', 'clients', 'isAdmin'));
     }
+
+
 
     /**
      * 案件作成ページ

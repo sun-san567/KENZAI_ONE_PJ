@@ -52,13 +52,36 @@ class ProjectFileController extends Controller
                 // 必要に応じてdescriptionなど他のフィールドも検索
             }
 
-            // ファイルタイプでフィルタリング（簡略化）
+            // ファイルタイプでフィルタリング
             if ($fileType) {
-                $query->where('mime_type', 'like', $fileType . '%');
+                switch ($fileType) {
+                    case 'favorite':
+                        $favoriteIds = auth()->user()->favoriteProjectFiles->pluck('id');
+                        $query->whereIn('id', $favoriteIds);
+                        break;
+
+                    case 'pdf':
+                        $query->where('file_extension', 'pdf');
+                        break;
+
+                    case 'doc':
+                        $query->whereIn('file_extension', ['doc', 'docx']);
+                        break;
+
+                    case 'xls':
+                        $query->whereIn('file_extension', ['xls', 'xlsx']);
+                        break;
+
+                    case 'img':
+                        $query->whereIn('file_extension', ['jpg', 'jpeg', 'png', 'gif']);
+                        break;
+                }
             }
 
             // ファイルを取得
-            $files = $query->orderBy('created_at', 'desc')->paginate(10);
+            $files = $query->orderBy('file_extension', 'asc')
+                ->paginate(10)
+                ->withQueryString();
 
             // AJAXリクエストの場合
             if ($request->ajax() || $request->has('ajax')) {
@@ -341,5 +364,18 @@ class ProjectFileController extends Controller
 
         // 対応していないファイル形式
         return response()->json(['error' => 'このファイル形式はプレビューに対応していません'], 400);
+    }
+
+    // お気に入りファイル処理
+    public function favorite(ProjectFile $projectFile)
+    {
+        auth()->user()->favoriteProjectFiles()->attach($projectFile->id);
+        return back();
+    }
+
+    public function unfavorite(ProjectFile $projectFile)
+    {
+        auth()->user()->favoriteProjectFiles()->detach($projectFile->id);
+        return back();
     }
 }

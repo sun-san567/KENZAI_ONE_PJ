@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
@@ -7,9 +7,104 @@
     <title>KENZAI-ONE</title>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- フォントの追加 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- カスタムスタイル -->
+    <style>
+        body {
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 日本語のフォントサイズとウェイトの調整 */
+        .text-xs {
+            font-size: 0.75rem;
+            letter-spacing: 0.025em;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+            letter-spacing: 0.015em;
+            line-height: 1.5;
+        }
+
+        .text-base {
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+            line-height: 1.6;
+        }
+
+        .text-lg,
+        .text-xl,
+        .text-2xl {
+            letter-spacing: -0.01em;
+        }
+
+        /* 日本語のフォントウェイト調整 */
+        .font-medium {
+            font-weight: 500;
+        }
+
+        /* カラーパレットの統一 */
+        .text-heading-primary {
+            @apply text-slate-800;
+            /* 主要見出し */
+        }
+
+        .text-heading-secondary {
+            @apply text-slate-700;
+            /* 副見出し */
+        }
+
+        .text-body {
+            @apply text-slate-700;
+            /* 本文テキスト */
+        }
+
+        .text-muted {
+            @apply text-slate-500;
+            /* 補足テキスト */
+        }
+
+        .text-link {
+            @apply text-indigo-600 hover:text-indigo-700;
+            /* リンクテキスト */
+        }
+
+        /* 意味を持つ色 */
+        .text-success {
+            @apply text-emerald-600;
+            /* 成功メッセージ */
+        }
+
+        .text-warning {
+            @apply text-amber-600;
+            /* 警告メッセージ */
+        }
+
+        .text-danger {
+            @apply text-rose-600;
+            /* エラーメッセージ */
+        }
+
+        .text-info {
+            @apply text-sky-600;
+            /* 情報メッセージ */
+        }
+    </style>
 </head>
 
-<body x-data="{ sidebarOpen: true }" class="bg-gray-100">
+<body
+    x-data="{ 
+    sidebarOpen: JSON.parse(localStorage.getItem('sidebarOpen') ?? 'true') 
+  }"
+    x-init="$watch('sidebarOpen', value => localStorage.setItem('sidebarOpen', value))"
+    class="bg-gray-100">
     <div class="flex h-screen overflow-hidden">
         <!-- サイドバー -->
         <div :class="sidebarOpen ? 'w-64' : 'w-16'"

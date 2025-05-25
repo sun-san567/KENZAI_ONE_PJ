@@ -17,4 +17,17 @@ class Client extends Model
         'phone',
         'address',
     ];
+
+    // app/Models/Client.php
+
+    public function contacts()
+    {
+        return $this->hasMany(ClientContact::class);
+    }
+
+    // プロジェクト to クライアントの関連付け
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'client_project')->withTimestamps();
+    }
 }

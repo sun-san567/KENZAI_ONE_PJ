@@ -64,7 +64,13 @@
                             <div class="font-medium text-gray-800">{{ $client->name }}</div>
                         </td>
                         <td class="px-6 py-4 text-gray-700">{{ $client->phone }}</td>
-                        <td class="px-6 py-4 text-gray-700 truncate max-w-xs" title="{{ $client->address }}">{{ $client->address }}</td>
+                        <td class="px-6 py-4 text-gray-700">
+                            <div class="max-w-[200px] truncate whitespace-nowrap overflow-hidden" title="{{ $client->address }}">
+                                {{ $client->address }}
+                            </div>
+                        </td>
+
+
                         <td class="px-6 py-4 text-right text-sm">
                             <div class="flex justify-end space-x-2">
                                 <!-- 編集ボタン -->
@@ -74,6 +80,17 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                                     </svg>
                                 </a>
+
+                                <!-- 担当者管理ボタン -->
+                                <a href="{{ route('clients.contacts.index', $client->id) }}"
+                                    class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
+                                    title="担当者管理">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </a>
+
 
                                 <!-- 削除ボタン -->
                                 <form action="{{ route('clients.destroy', $client->id) }}" method="POST" onsubmit="return confirmDelete(event)" class="inline">

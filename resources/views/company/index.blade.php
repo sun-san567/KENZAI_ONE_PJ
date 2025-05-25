@@ -30,44 +30,53 @@
     </div>
     @else
     <!-- 会社情報セクション -->
+    <!-- 会社情報セクション -->
     <div class="bg-gray-50 shadow-md rounded-lg border border-gray-200 p-6">
-        <h1 class="text-xl font-semibold text-gray-800 border-b border-gray-300 pb-4">会社情報管理</h1>
+        <h1 class="text-xl font-semibold text-gray-800 flex items-center justify-between border-b border-gray-300 pb-4">
+            会社情報管理
+        </h1>
 
-        <!-- 会社情報テーブル -->
-        <div class="w-full overflow-x-auto rounded-lg shadow">
-            <table class="w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
+        <!-- テーブル -->
+        <div class="w-full mt-4">
+            <table class="w-full table-fixed divide-y divide-gray-200">
+                <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">会社名</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase w-1/3">住所</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase w-1/6">電話番号</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase w-1/4">メール</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase w-24">操作</th>
+                        <th class="px-4 py-3 text-left whitespace-nowrap w-[25%]">会社名</th>
+                        <th class="px-4 py-3 text-left whitespace-nowrap w-[40%]">住所</th>
+                        <th class="px-4 py-3 text-left whitespace-nowrap w-[15%]">電話番号</th>
+                        <th class="px-4 py-3 text-left whitespace-nowrap w-[20%]">メール</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-600 uppercase whitespace-nowrap">操作</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                    <tr class="hover:bg-gray-50 transition"></tr>
-                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->name }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-800">
-                        <div class="truncate" title="{{ $company->address }}">{{ $company->address }}</div>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">{{ $company->phone }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-800">
-                        <div class="truncate" title="{{ $company->email }}">{{ $company->email }}</div>
-                    </td>
-                    <td class="px-6 py-4 text-right whitespace-nowrap">
-                        <a href="{{ route('company.edit', $company->id) }}"
-                            class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                            </svg>
-                        </a>
-                    </td>
+                <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            {{ $company->name }}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            {{ $company->address }}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            {{ $company->phone }}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            {{ $company->email }}
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <a href="{{ route('company.edit', $company->id) }}"
+                                class="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </a>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
 
     <!-- 部門管理セクション -->
     <div class="mt-8 bg-gray-50 shadow-md rounded-lg border border-gray-200 p-6">
@@ -100,6 +109,15 @@
                         <td class="px-6 py-4 text-sm text-gray-800">{{ $department->name }}</td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end space-x-2">
+
+                                <!-- 部門に所属するユーザー一覧リンク -->
+                                <a href="{{ route('users.index') }}?department={{ $department->id }}"
+                                    class="inline-flex items-center space-x-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-semibold px-3 py-1.5 rounded shadow-sm transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    <span>所属ユーザー</span>
+                                </a>
                                 <!-- 編集ボタン -->
                                 <a href="{{ route('departments.edit', $department->id) }}"
                                     class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md">

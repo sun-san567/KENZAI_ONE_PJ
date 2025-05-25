@@ -50,6 +50,8 @@ class ClientController extends Controller
             'department_id' => $request->department_id,
             'user_id' => $request->user_id,
             'name' => $request->name,
+            'phone' => $request->phone,
+            'address' => $request->address,
         ]);
 
         return redirect()->route('clients.index')->with('success', 'クライアントを登録しました');
@@ -75,6 +77,8 @@ class ClientController extends Controller
             'name' => 'required|string|max:255',
             'department_id' => 'nullable|exists:departments,id',
             'user_id' => 'nullable|exists:users,id',
+            'phone' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
         ]);
 
         // クライアント情報の更新
@@ -82,9 +86,16 @@ class ClientController extends Controller
             'name' => $request->name,
             'department_id' => $request->department_id,
             'user_id' => $request->user_id,
+            'phone' => $request->phone,
+            'address' => $request->address,
         ]);
 
         // 成功メッセージを設定し、クライアント一覧ページへリダイレクト
         return redirect()->route('clients.index')->with('success', 'クライアント情報を更新しました。');
+    }
+
+    public function show(Client $client)
+    {
+        return view('clients.show', compact('client'));
     }
 }

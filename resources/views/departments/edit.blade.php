@@ -32,14 +32,13 @@
             <div class="mb-4">
                 <label for="company_id" class="block text-gray-700 font-medium mb-1">所属会社 <span class="text-red-500">*</span></label>
                 <select id="company_id" name="company_id"
-                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    @foreach ($companies as $company)
-                    <option value="{{ $company->id }}" {{ $department->company_id == $company->id ? 'selected' : '' }}>
-                        {{ $company->name }}
+                    class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" readonly>
+                    <option value="{{ auth()->user()->company_id }}" selected>
+                        {{ auth()->user()->company->name }}
                     </option>
-                    @endforeach
                 </select>
             </div>
+
 
             <!-- ボタン -->
             <div class="flex justify-end space-x-4">

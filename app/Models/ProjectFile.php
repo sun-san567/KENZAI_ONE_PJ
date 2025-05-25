@@ -32,4 +32,9 @@ class ProjectFile extends Model
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
+
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorite_project_files')->withTimestamps();
+    }
 }

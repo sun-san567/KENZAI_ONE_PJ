@@ -42,6 +42,21 @@
                     value="{{ old('name', $client->name) }}" required>
             </div>
 
+            <!-- 電話番号 -->
+            <div class="mb-4">
+                <label for="phone" class="block text-sm font-medium text-gray-700">電話番号</label>
+                <input type="text" name="phone" id="phone" class="w-full border-gray-300 rounded-md p-2 shadow-sm"
+                    value="{{ old('phone', $client->phone) }}">
+            </div>
+
+            <!-- 住所 -->
+            <div class="mb-4">
+                <label for="address" class="block text-sm font-medium text-gray-700">住所</label>
+                <input type="text" name="address" id="address" class="w-full border-gray-300 rounded-md p-2 shadow-sm"
+                    value="{{ old('address', $client->address) }}">
+            </div>
+
+
             <!-- 部門選択 -->
             <div class="mb-4">
                 <label for="department_id" class="block text-sm font-medium text-gray-700">部門</label>

@@ -61,4 +61,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Department::class);
     }
+
+    // User.php
+    public function favoriteProjectFiles()
+    {
+        return $this->belongsToMany(ProjectFile::class, 'favorite_project_files')->withTimestamps();
+    }
 }

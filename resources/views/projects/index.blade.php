@@ -27,14 +27,125 @@
         </button>
     </div>
 
+    <!-- 案件管理：検索フォーム (リファクタ版) -->
+    <div class="bg-white rounded-lg shadow-sm p-5 mb-6" x-data="{
+    showAdvanced: false,
+    clearForm() {
+        this.$refs.nameInput.value = '';
+        this.$refs.clientInput.value = '';
+        this.$refs.estimateStartInput.value = '';
+        this.$refs.estimateEndInput.value = '';
+        this.$refs.completionDateInput.value = '';
+    }
+}">
+        <form action="{{ route('projects.index') }}" method="GET" class="space-y-4">
+
+            <!-- メイン検索エリア -->
+            <div class="flex flex-col md:flex-row gap-3 items-end">
+                <div class="flex-grow">
+                    <label for="search_name" class="block text-sm font-medium text-gray-700 mb-1">プロジェクト名・取引先名</label>
+                    <input type="text" id="search_name" name="search_name" x-ref="nameInput"
+                        value="{{ request('search_name') }}"
+                        placeholder="プロジェクト名または取引先名を入力"
+                        class="w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                </div>
+
+                <div class="flex gap-2 ml-auto">
+                    <button type="button" @click="showAdvanced = !showAdvanced"
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition flex items-center">
+                        <span x-text="showAdvanced ? '基本検索' : '詳細検索'"></span>
+                        <svg x-show="!showAdvanced" class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg x-show="showAdvanced" class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </button>
+
+                    <button type="reset" @click="clearForm"
+                        class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+                        クリア
+                    </button>
+
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                        検索
+                    </button>
+                </div>
+            </div>
+
+            <!-- 詳細検索エリア -->
+            <div x-show="showAdvanced" x-transition class="mt-4 border-t pt-4 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <!-- 見積期限 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">見積期限（開始〜終了）</label>
+                        <div class="flex items-center space-x-2">
+                            <!-- 開始日 -->
+                            <input type="date" id="search_estimate_deadline_start" name="search_estimate_deadline_start"
+                                x-ref="estimateStartInput"
+                                value="{{ request('search_estimate_deadline_start') }}"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+
+                            <span class="text-gray-500">〜</span>
+
+                            <!-- 終了日 -->
+                            <input type="date" id="search_estimate_deadline_end" name="search_estimate_deadline_end"
+                                x-ref="estimateEndInput"
+                                value="{{ request('search_estimate_deadline_end') }}"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+
+                            <!-- 本日セットボタン -->
+                            <button type="button"
+                                @click="
+                const today = new Date().toISOString().split('T')[0];
+                $refs.estimateStartInput.value = today;
+                $refs.estimateEndInput.value = today;
+            "
+                                class="ml-2 px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
+                                本日
+                            </button>
+                            <!-- 1週間ボタン -->
+                            <button type="button"
+                                @click="
+                        const today = new Date();
+                        const nextWeek = new Date();
+                        nextWeek.setDate(today.getDate() + 7);
+                        $refs.estimateStartInput.value = today.toISOString().split('T')[0];
+                        $refs.estimateEndInput.value = nextWeek.toISOString().split('T')[0];
+                    "
+                                class="px-3 py-2 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
+                                1週間
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- 竣工日 -->
+                    <div>
+                        <label for="search_end_date" class="block text-sm font-medium text-gray-700 mb-1">竣工日（完了予定日）</label>
+                        <input type="date" id="search_end_date" name="search_end_date"
+                            x-ref="completionDateInput"
+                            value="{{ request('search_end_date') }}"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+
+
     <!-- 📌 モバイル用: フローティングボタン -->
-    <button @click="openModal = true; selectedProject = { categories: [] }"
+    <!-- <button @click="openModal = true; selectedProject = { categories: [] }"
         x-show="!openModal"
         x-cloak
         class="fixed md:hidden z-50 shadow-lg transition hover:shadow-xl hover:scale-105
                bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full">
         +
-    </button>
+    </button> -->
 
     <!-- 画面上部に表示するステータス -->
     <!-- <div class="bg-white p-4 mb-4 rounded-lg shadow-sm border border-gray-200">
@@ -62,7 +173,10 @@
                     <!-- 最初の5つのプロジェクトを表示 -->
                     @foreach($phase->projects->take(5) as $index => $project)
                     <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors"
-                        @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                        @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'"
+                        @if($project->is_deadline_today)
+                        border-2 border-red-500 bg-red-50
+                        @endif">
                         <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
                         <!-- <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p> -->
 
@@ -83,6 +197,13 @@
                                 <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span>
                                 <p class="text-sm font-medium text-green-700 ml-1">¥{{ number_format($project->profit ?? 0) }}</p>
                             </div>
+                            @if(isset($project->estimate_deadline))
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">見積期限：</span>
+                                <!-- <span class="text-xs text-gray-500 w-16 flex-shrink-0">粗利：</span> -->
+                                <p class="text-sm font-medium text-yellow-700 ml-1">{{ $project->estimate_deadline->format('Y/m/d') }}</p>
+                            </div>
+                            @endif
                         </div>
 
                         @if(count($project->categories) > 0)
@@ -107,7 +228,10 @@
                     <div class="hidden-projects hidden">
                         @foreach($phase->projects->skip(5) as $project)
                         <div class="project-card bg-white border border-gray-200 p-4 rounded-md shadow-sm cursor-pointer hover:border-blue-300 hover:bg-blue-50/10 transition-colors mt-4"
-                            @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'">
+                            @click="openModal = true; selectedProject = { ...{{ $project->toJson() }}, categories: {{ $project->categories->toJson() }} || [] }; activeTab = 'edit'"
+                            @if($project->is_deadline_today)
+                            border-2 border-red-500 bg-red-50
+                            @endif">
                             <h3 class="font-semibold text-gray-800 truncate">{{ $project->name }}</h3>
                             <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $project->description }}</p>
 
@@ -119,22 +243,7 @@
                                 </div>
                             </div>
 
-                            <!-- 見積期限 -->
-                            <div class="mt-1 flex items-center">
-                                <span class="text-xs text-gray-500 w-16 flex-shrink-0">見積期限：</span>
-                                <p class="text-sm font-medium text-gray-700 ml-1">
-                                    @php
-                                    $deadline = null;
-                                    try {
-                                    $deadline = $project->estimate_deadline ? \Carbon\Carbon::parse($project->estimate_deadline)->format('Y/m/d') : null;
-                                    } catch (\Exception $e) {
-                                    // パースエラー時のフォールバック
-                                    $deadline = $project->estimate_deadline;
-                                    }
-                                    @endphp
-                                    {{ $deadline ?: '未設定' }}
-                                </p>
-                            </div>
+
 
                             @if(config('app.debug'))
                             <!-- デバッグ情報（開発環境のみ表示） -->
@@ -176,7 +285,7 @@
                     <div class="flex justify-center mt-2 bg-white">
                         <button class="show-more-btn text-sm text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition-colors flex items-center">
                             <span>もっと見る</span>
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
@@ -225,12 +334,12 @@
                         :class="activeTab === 'edit' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'">
                         案件詳細
                     </button>
-                    <!-- <button @click="activeTab = 'files'"
+                    <button @click="activeTab = 'files'"
                         class="px-6 py-3 font-semibold transition border-b-4 border-blue-500 text-blue-600"
                         :class="activeTab === 'files' ? 'border-b-4 border-blue-500 text-blue-600' : 'text-gray-500'"
                         x-show="selectedProject">
-                        ファイル管理
-                    </button> -->
+                        クライアント
+                    </button>
                 </div>
 
                 <!-- 📌 案件編集タブ -->
@@ -290,22 +399,47 @@
                                 </div>
 
                                 <!-- 顧客 -->
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">顧客</label>
-                                    <select name="client_id"
-                                        class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400">
-                                        @foreach ($clients as $client)
-                                        <option value="{{ $client->id }}"
-                                            x-bind:selected="selectedProject && selectedProject.client_id == {{ $client->id }}">
-                                            {{ $client->name }}
-                                        </option>
-                                        @endforeach
-                                    </select>
+                                <div class="mb-4" x-data="{
+                                    clients: {{ $clients->toJson() }},
+                                    keyword: '',
+                                    get filteredClients() {
+                                        if (!this.keyword.trim()) return this.clients;
+                                        const searchTerm = this.keyword.toLowerCase().trim();
+                                        return this.clients.filter(client => 
+                                            client.name.toLowerCase().includes(searchTerm)
+                                        );
+                                    }
+                                }">
+                                    <!-- 絞り込み適用されるセレクトボックス -->
+                                    <div x-data="clientSelector()" class="mb-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">顧客</label>
+
+                                        <div class="relative border border-gray-300 rounded-md shadow-sm">
+                                            <!-- 検索input -->
+                                            <input type="text" x-model="keyword" placeholder="顧客名で検索"
+                                                class="w-full px-3 py-2 rounded-t-md focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+                                            <!-- セレクトボックス -->
+                                            <select name="client_id"
+                                                class="w-full px-3 py-2 rounded-b-md border-t border-gray-300 focus:ring-2 focus:ring-blue-400">
+                                                <template x-for="client in filteredClients" :key="client.id">
+                                                    <option :value="client.id" x-text="client.name"
+                                                        :selected="selectedProject && selectedProject.client_id == client.id"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <!-- 0件時の案内 -->
+                                        <div class="text-sm text-gray-500 mt-1" x-show="keyword.trim() && filteredClients.length === 0">
+                                            「<span x-text="keyword"></span>」に一致する顧客はありません
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
                             <!-- 説明 -->
-                            <div class="mb-4">
+                            <div class="mb-0.5">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">説明</label>
                                 <textarea name="description"
                                     class="w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-400 h-32"
@@ -396,7 +530,6 @@
                                     <span x-text="selectedCategories.length + ' 個のカテゴリが選択されています'"></span>
                                 </div>
                             </div>
-
                         </div>
 
                         <!-- 最適化されたボタンレイアウト -->
