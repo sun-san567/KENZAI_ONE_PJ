@@ -28,16 +28,19 @@
     </div>
 
     <!-- 案件管理：検索フォーム (リファクタ版) -->
-    <div class="bg-white rounded-lg shadow-sm p-5 mb-6" x-data="{
-    showAdvanced: false,
-    clearForm() {
-        this.$refs.nameInput.value = '';
-        this.$refs.clientInput.value = '';
-        this.$refs.estimateStartInput.value = '';
-        this.$refs.estimateEndInput.value = '';
-        this.$refs.completionDateInput.value = '';
-    }
-}">
+    <div
+        class="bg-white rounded-lg shadow-sm p-5 mb-6
+               max-w-[90%] xl:max-w-screen-xl px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mx-auto transition-all duration-300"
+        x-data="{
+            showAdvanced: false,
+            clearForm() {
+                this.$refs.nameInput.value = '';
+                this.$refs.clientInput.value = '';
+                this.$refs.estimateStartInput.value = '';
+                this.$refs.estimateEndInput.value = '';
+                this.$refs.completionDateInput.value = '';
+            }
+        }">
         <form action="{{ route('projects.index') }}" method="GET" class="space-y-4">
 
             <!-- メイン検索エリア -->
@@ -51,22 +54,10 @@
                 </div>
 
                 <div class="flex gap-2 ml-auto">
-                    <button type="button" @click="showAdvanced = !showAdvanced"
-                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition flex items-center">
-                        <span x-text="showAdvanced ? '基本検索' : '詳細検索'"></span>
-                        <svg x-show="!showAdvanced" class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                        <svg x-show="showAdvanced" class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                        </svg>
-                    </button>
-
                     <button type="reset" @click="clearForm"
                         class="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
                         クリア
                     </button>
-
                     <button type="submit"
                         class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
                         検索
@@ -74,61 +65,85 @@
                 </div>
             </div>
 
-            <!-- 詳細検索エリア -->
-            <div x-show="showAdvanced" x-transition class="mt-4 border-t pt-4 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+            <!-- 見積期限・竣工日エリア（常時表示） -->
+            <div class="mt-4 border-t pt-4">
+                <div class="flex flex-col md:flex-row md:gap-6 gap-4 w-full">
                     <!-- 見積期限 -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">見積期限（開始〜終了）</label>
-                        <div class="flex items-center space-x-2">
-                            <!-- 開始日 -->
-                            <input type="date" id="search_estimate_deadline_start" name="search_estimate_deadline_start"
-                                x-ref="estimateStartInput"
-                                value="{{ request('search_estimate_deadline_start') }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-
-                            <span class="text-gray-500">〜</span>
-
-                            <!-- 終了日 -->
-                            <input type="date" id="search_estimate_deadline_end" name="search_estimate_deadline_end"
-                                x-ref="estimateEndInput"
-                                value="{{ request('search_estimate_deadline_end') }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-
-                            <!-- 本日セットボタン -->
-                            <button type="button"
-                                @click="
-                const today = new Date().toISOString().split('T')[0];
-                $refs.estimateStartInput.value = today;
-                $refs.estimateEndInput.value = today;
-            "
-                                class="ml-2 px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
-                                本日
-                            </button>
-                            <!-- 1週間ボタン -->
-                            <button type="button"
-                                @click="
-                        const today = new Date();
-                        const nextWeek = new Date();
-                        nextWeek.setDate(today.getDate() + 7);
-                        $refs.estimateStartInput.value = today.toISOString().split('T')[0];
-                        $refs.estimateEndInput.value = nextWeek.toISOString().split('T')[0];
-                    "
-                                class="px-3 py-2 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
-                                1週間
-                            </button>
-                        </div>
+                    <div class="flex-1 flex items-center flex-wrap bg-gray-50 p-3 rounded-lg border border-gray-200 min-w-0">
+                        <label class="block text-sm font-medium text-gray-700 mb-0 mr-2 whitespace-nowrap">見積期限</label>
+                        <input type="date" id="search_estimate_deadline_start" name="search_estimate_deadline_start"
+                            x-ref="estimateStartInput"
+                            value="{{ request('search_estimate_deadline_start') }}"
+                            class="w-28 md:w-36 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm px-2 py-1 flex-shrink-0">
+                        <span class="text-gray-500 mx-1">〜</span>
+                        <input type="date" id="search_estimate_deadline_end" name="search_estimate_deadline_end"
+                            x-ref="estimateEndInput"
+                            value="{{ request('search_estimate_deadline_end') }}"
+                            class="w-28 md:w-36 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm px-2 py-1 flex-shrink-0">
+                        <button type="button"
+                            @click="
+                                const today = new Date().toISOString().split('T')[0];
+                                $refs.estimateStartInput.value = today;
+                                $refs.estimateEndInput.value = today;
+                            "
+                            class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition whitespace-nowrap flex-shrink-0">
+                            本日
+                        </button>
+                        <button type="button"
+                            @click="
+                                const today = new Date();
+                                const nextWeek = new Date();
+                                nextWeek.setDate(today.getDate() + 7);
+                                $refs.estimateStartInput.value = today.toISOString().split('T')[0];
+                                $refs.estimateEndInput.value = nextWeek.toISOString().split('T')[0];
+                            "
+                            class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition whitespace-nowrap flex-shrink-0">
+                            1週間
+                        </button>
+                        <button type="button"
+                            @click="$refs.estimateStartInput.value = ''; $refs.estimateEndInput.value = '';"
+                            class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition whitespace-nowrap flex-shrink-0">
+                            クリア
+                        </button>
                     </div>
 
-
                     <!-- 竣工日 -->
-                    <div>
-                        <label for="search_end_date" class="block text-sm font-medium text-gray-700 mb-1">竣工日（完了予定日）</label>
-                        <input type="date" id="search_end_date" name="search_end_date"
-                            x-ref="completionDateInput"
-                            value="{{ request('search_end_date') }}"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    <div class="flex-1 flex items-center flex-wrap bg-gray-50 p-3 rounded-lg border border-gray-200 min-w-0">
+                        <label class="block text-sm font-medium text-gray-700 mb-0 mr-2 whitespace-nowrap">竣工日</label>
+                        <input type="date" id="search_end_date_start" name="search_end_date_start"
+                            x-ref="completionStartInput"
+                            value="{{ request('search_end_date_start') }}"
+                            class="w-28 md:w-36 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm px-2 py-1 flex-shrink-0">
+                        <span class="text-gray-500 mx-1">〜</span>
+                        <input type="date" id="search_end_date_end" name="search_end_date_end"
+                            x-ref="completionEndInput"
+                            value="{{ request('search_end_date_end') }}"
+                            class="w-28 md:w-36 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm px-2 py-1 flex-shrink-0">
+                        <button type="button"
+                            @click="
+                                const today = new Date().toISOString().split('T')[0];
+                                $refs.completionStartInput.value = today;
+                                $refs.completionEndInput.value = today;
+                            "
+                            class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition whitespace-nowrap flex-shrink-0">
+                            本日
+                        </button>
+                        <button type="button"
+                            @click="
+                                const today = new Date();
+                                const nextWeek = new Date();
+                                nextWeek.setDate(today.getDate() + 7);
+                                $refs.completionStartInput.value = today.toISOString().split('T')[0];
+                                $refs.completionEndInput.value = nextWeek.toISOString().split('T')[0];
+                            "
+                            class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition whitespace-nowrap flex-shrink-0">
+                            1週間
+                        </button>
+                        <button type="button"
+                            @click="$refs.completionStartInput.value = ''; $refs.completionEndInput.value = '';"
+                            class="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition whitespace-nowrap flex-shrink-0">
+                            クリア
+                        </button>
                     </div>
                 </div>
             </div>
